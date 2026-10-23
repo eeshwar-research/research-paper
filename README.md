@@ -51,4 +51,4 @@ python src/experiment.py --data data/processed/firm_year_cpc.csv.gz --outdir out
 - M3 is compared with M2 on identical held-out pairs; the bootstrap resamples firms.
 
 ## Publication status
-The extract, pre-specified split, results, and Crossref-verified Q1 ScienceDirect/IEEE reference list are in `paper.md`. Remaining submission steps: confirm the legal author name, country, and postal affiliation; convert `paper.md` to Word or LaTeX (KBS does not accept Markdown or PDF as the source file); upload `highlights.txt` as a separate Highlights file; complete the Elsevier competing-interest .docx form; and optionally run a second chronological cutoff.
+The extract, pre-specified split, results, and Crossref-verified Q1 ScienceDirect/IEEE reference list are in `paper.md`. A double-spaced letter-size print of the revised short communication is 9 pages including tables and figures (KBS limit: 10). Remaining submission steps: confirm the legal author name, country, and postal affiliation; convert `paper.md` to Word or LaTeX; upload `highlights.txt` as a separate Highlights file; and complete the Elsevier competing-interest .docx form.

@@ -1,71 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620">
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="250" viewBox="0 0 1400 300">
   <defs>
     <style>
-      .sub{font:18px Arial;fill:#41566a}
-      .lab{font:700 17px Arial;fill:#132b3e}
-      .txt{font:15px Arial;fill:#31495e}
-      .note{font:14px Arial;fill:#526a7e}
+      .lab{font:700 15px Arial;fill:#132b3e}
+      .txt{font:13px Arial;fill:#31495e}
+      .note{font:12px Arial;fill:#526a7e}
     </style>
     <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#49627a"/></marker>
   </defs>
-  <rect width="1400" height="620" fill="#fbfdff"/>
-  <text x="50" y="42" class="sub">Chronological protocol used in the PatentsView run: predict at t from data ≤ t; score first entry in t+1</text>
-
-  <text x="60" y="92" class="lab">Calendar time (grant years)</text>
-  <path d="M80 168 H1320" stroke="#49627a" stroke-width="3" marker-end="url(#arr)"/>
-
-  <g class="note" text-anchor="middle">
-    <text x="230" y="128">Burn-in</text>
-    <text x="560" y="128">Training prediction years</text>
-    <text x="860" y="128">Embargo</text>
-    <text x="1120" y="128">Future holdout</text>
-  </g>
-
-  <rect x="80" y="186" width="250" height="110" rx="12" fill="#e8eef6" stroke="#315d91" stroke-width="2"/>
-  <text x="205" y="228" text-anchor="middle" class="lab">2010–2012</text>
-  <text x="205" y="258" text-anchor="middle" class="txt">Fix 30 CPC candidates</text>
-  <text x="205" y="280" text-anchor="middle" class="note">Not selected from the test window</text>
-
-  <rect x="350" y="186" width="420" height="110" rx="12" fill="#dceafe" stroke="#315d91" stroke-width="2"/>
-  <text x="560" y="228" text-anchor="middle" class="lab">2013–2019</text>
-  <text x="560" y="258" text-anchor="middle" class="txt">1,540,698 firm–class pairs</text>
-  <text x="560" y="280" text-anchor="middle" class="note">2019 used only for thresholds</text>
-
-  <rect x="790" y="186" width="160" height="110" rx="12" fill="#fff0d4" stroke="#a56a12" stroke-width="2"/>
-  <text x="870" y="228" text-anchor="middle" class="lab">2020</text>
-  <text x="870" y="258" text-anchor="middle" class="txt">Held out</text>
-  <text x="870" y="280" text-anchor="middle" class="note">No overlap</text>
-
-  <rect x="970" y="186" width="340" height="110" rx="12" fill="#d9f4e5" stroke="#28734d" stroke-width="2"/>
-  <text x="1140" y="228" text-anchor="middle" class="lab">2021–2022</text>
-  <text x="1140" y="258" text-anchor="middle" class="txt">455,458 pairs; 10,411 firms</text>
-  <text x="1140" y="280" text-anchor="middle" class="note">Labels unused in fitting</text>
-
-  <path d="M330 176 V310" stroke="#315d91" stroke-width="2" stroke-dasharray="7 6"/>
-  <path d="M770 176 V310" stroke="#a56a12" stroke-width="2" stroke-dasharray="7 6"/>
-  <path d="M950 176 V310" stroke="#28734d" stroke-width="2" stroke-dasharray="7 6"/>
-
-  <rect x="80" y="340" width="400" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
-  <text x="104" y="378" class="lab">A. Feature clock</text>
-  <text x="104" y="412" class="txt">History for firm f at year t uses</text>
-  <text x="104" y="438" class="txt">only patents granted in years ≤ t.</text>
-  <text x="104" y="464" class="txt">Target = first appearance of class c</text>
-  <text x="104" y="490" class="txt">in year t+1, among non-held classes.</text>
-
-  <rect x="500" y="340" width="400" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
-  <text x="524" y="378" class="lab">B. Models compared</text>
-  <text x="524" y="412" class="txt">M1 logistic: activity features only</text>
-  <text x="524" y="438" class="txt">M2 random forest: same features</text>
-  <text x="524" y="464" class="txt">M3 random forest: activity + graph</text>
-  <text x="524" y="490" class="txt">Identical candidates and split</text>
-
-  <rect x="920" y="340" width="400" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
-  <text x="944" y="378" class="lab">C. What is reported</text>
-  <text x="944" y="412" class="txt">Average precision vs 1.11% base rate</text>
-  <text x="944" y="438" class="txt">ROC-AUC; balanced accuracy; Brier</text>
-  <text x="944" y="464" class="txt">Firm-cluster 95% interval for M3−M2</text>
-  <text x="944" y="490" class="txt">No demo-mode numbers are used</text>
-
-  <text x="50" y="560" class="note">This figure documents the executed protocol. It is not a performance chart. Measured scores are in Table 2.</text>
-  <text x="50" y="586" class="note">A second chronological cutoff was not run; temporal robustness across windows remains untested.</text>
+  <rect width="1400" height="300" fill="#fbfdff"/>
+  <text x="40" y="28" class="lab">Grant-year protocol: features at t from data ≤ t; score first entry in t+1</text>
+  <path d="M50 70 H1350" stroke="#49627a" stroke-width="3" marker-end="url(#arr)"/>
+  <rect x="50" y="86" width="250" height="88" rx="10" fill="#e8eef6" stroke="#315d91" stroke-width="2"/>
+  <text x="175" y="118" text-anchor="middle" class="lab">2010–2012</text>
+  <text x="175" y="142" text-anchor="middle" class="txt">Fix 30 CPC candidates</text>
+  <text x="175" y="162" text-anchor="middle" class="note">Burn-in only</text>
+  <rect x="320" y="86" width="420" height="88" rx="10" fill="#dceafe" stroke="#315d91" stroke-width="2"/>
+  <text x="530" y="118" text-anchor="middle" class="lab">2013–2019</text>
+  <text x="530" y="142" text-anchor="middle" class="txt">1,540,698 training pairs</text>
+  <text x="530" y="162" text-anchor="middle" class="note">2019 used for thresholds</text>
+  <rect x="760" y="86" width="160" height="88" rx="10" fill="#fff0d4" stroke="#a56a12" stroke-width="2"/>
+  <text x="840" y="118" text-anchor="middle" class="lab">2020</text>
+  <text x="840" y="142" text-anchor="middle" class="txt">Embargo</text>
+  <text x="840" y="162" text-anchor="middle" class="note">No overlap</text>
+  <rect x="940" y="86" width="360" height="88" rx="10" fill="#d9f4e5" stroke="#28734d" stroke-width="2"/>
+  <text x="1120" y="118" text-anchor="middle" class="lab">2021–2022</text>
+  <text x="1120" y="142" text-anchor="middle" class="txt">455,458 pairs; 10,411 firms</text>
+  <text x="1120" y="162" text-anchor="middle" class="note">Labels unused in fitting</text>
+  <text x="40" y="214" class="txt">M1 logistic and M2 forest use activity features only. M3 adds common-neighbor, peer-adoption, and degree features. Average precision is reported against the 1.11% base rate, with a firm-cluster 95% interval for M3 − M2.</text>
+  <text x="40" y="242" class="note">This figure documents the executed protocol. Measured scores are in Table 2. A second chronological cutoff was not run.</text>
+  <text x="40" y="268" class="note">Demo-mode metrics are not used.</text>
 </svg>

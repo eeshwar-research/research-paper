@@ -219,7 +219,7 @@ def write_protocol_figures(figdir: Path):
         for i, line in enumerate(lines):
             ax.text(x + 0.04, y + h - 0.28 - 0.16 * i, line, fontsize=9.2, color="#31495e", va="top")
 
-    fig, ax = plt.subplots(figsize=(11.2, 5.4))
+    fig, ax = plt.subplots(figsize=(11.2, 3.4))
     ax.set_xlim(0, 12)
     ax.set_ylim(0, 6)
     ax.axis("off")
@@ -259,7 +259,7 @@ def write_protocol_figures(figdir: Path):
     fig.savefig(figdir / "figure1_architecture.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(11.2, 5.4))
+    fig, ax = plt.subplots(figsize=(11.2, 3.0))
     ax.set_xlim(0, 12)
     ax.set_ylim(0, 6)
     ax.axis("off")
