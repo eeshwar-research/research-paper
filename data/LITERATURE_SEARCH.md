@@ -12,7 +12,7 @@ Documented reference set for the *Knowledge-Based Systems* short communication. 
 - **Exclusion:** records whose DOI did not resolve to the cited title; conference papers; journals that are not Q1 in a field-relevant SCImago category
 
 ## Publisher and quartile screen
-The manuscript cites **23 journal articles** plus **2 data/web sources**. Quartiles use SCImago best field-relevant quartile (2024).
+The manuscript cites **23 journal articles** plus **2 data/web sources**. Quartiles use SCImago best field-relevant quartile (2024). The GitHub archive is linked from the data-availability statement but is not a numbered reference, because it has no DOI.
 
 | Publisher | Count | Journals (field-relevant best quartile) |
 |---|---:|---|
@@ -60,6 +60,8 @@ The manuscript cites **23 journal articles** plus **2 data/web sources**. Quarti
 - Park & Yoon (2017) *TFSC*, Feng et al. (2026) *AEI*, Chang et al. (2025) *AEI*, Rodriguez et al. (2016) *IEEE TEM*, and Sarica et al. (2020) *ESWA* were added as Q1 replacements.
 - Every bibliography entry is cited in the text; numbering follows first appearance (Elsevier numbered style).
 - The PatentsView dump is marked `[dataset]` as required by the KBS data-reference rule.
+- Wang et al. (2024) *AEI* 62, 102944 includes Zhenghong Liu as the seventh author (Crossref, 23 October 2026).
+- The GitHub archive is linked from Data availability; it is not a numbered software citation and does not replace a DOI deposit of the processed table.
 
 ## Gap after the expanded set
 Prior firm-specific TOD studies typically validate opportunities for one or a few target firms, use random or unspecified splits, or evaluate GNN/link-prediction quality without a leakage-controlled, many-firm, out-of-time comparison of inspectable graph features against tabular baselines. That remains the scoped contribution of this short communication.

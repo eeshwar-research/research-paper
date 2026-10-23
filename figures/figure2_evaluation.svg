@@ -1,32 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="250" viewBox="0 0 1400 300">
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="220" viewBox="0 0 1400 220">
   <defs>
     <style>
-      .lab{font:700 15px Arial;fill:#132b3e}
-      .txt{font:13px Arial;fill:#31495e}
-      .note{font:12px Arial;fill:#526a7e}
+      .lab{font:700 14px Arial, Helvetica, sans-serif;fill:#0f172a}
+      .txt{font:13px Arial, Helvetica, sans-serif;fill:#1e293b}
+      .note{font:12px Arial, Helvetica, sans-serif;fill:#334155}
     </style>
-    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#49627a"/></marker>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker>
   </defs>
-  <rect width="1400" height="300" fill="#fbfdff"/>
-  <text x="40" y="28" class="lab">Grant-year protocol: features at t from data ≤ t; score first entry in t+1</text>
-  <path d="M50 70 H1350" stroke="#49627a" stroke-width="3" marker-end="url(#arr)"/>
-  <rect x="50" y="86" width="250" height="88" rx="10" fill="#e8eef6" stroke="#315d91" stroke-width="2"/>
-  <text x="175" y="118" text-anchor="middle" class="lab">2010–2012</text>
-  <text x="175" y="142" text-anchor="middle" class="txt">Fix 30 CPC candidates</text>
-  <text x="175" y="162" text-anchor="middle" class="note">Burn-in only</text>
-  <rect x="320" y="86" width="420" height="88" rx="10" fill="#dceafe" stroke="#315d91" stroke-width="2"/>
-  <text x="530" y="118" text-anchor="middle" class="lab">2013–2019</text>
-  <text x="530" y="142" text-anchor="middle" class="txt">1,540,698 training pairs</text>
-  <text x="530" y="162" text-anchor="middle" class="note">2019 used for thresholds</text>
-  <rect x="760" y="86" width="160" height="88" rx="10" fill="#fff0d4" stroke="#a56a12" stroke-width="2"/>
-  <text x="840" y="118" text-anchor="middle" class="lab">2020</text>
-  <text x="840" y="142" text-anchor="middle" class="txt">Embargo</text>
-  <text x="840" y="162" text-anchor="middle" class="note">No overlap</text>
-  <rect x="940" y="86" width="360" height="88" rx="10" fill="#d9f4e5" stroke="#28734d" stroke-width="2"/>
-  <text x="1120" y="118" text-anchor="middle" class="lab">2021–2022</text>
-  <text x="1120" y="142" text-anchor="middle" class="txt">455,458 pairs; 10,411 firms</text>
-  <text x="1120" y="162" text-anchor="middle" class="note">Labels unused in fitting</text>
-  <text x="40" y="214" class="txt">M1 logistic and M2 forest use activity features only. M3 adds common-neighbor, peer-adoption, and degree features. Average precision is reported against the 1.11% base rate, with a firm-cluster 95% interval for M3 − M2.</text>
-  <text x="40" y="242" class="note">This figure documents the executed protocol. Measured scores are in Table 2. A second chronological cutoff was not run.</text>
-  <text x="40" y="268" class="note">Demo-mode metrics are not used.</text>
+  <rect width="1400" height="220" fill="#ffffff"/>
+  <path d="M40 48 H1360" stroke="#334155" stroke-width="2.4" marker-end="url(#arr)"/>
+  <rect x="40" y="70" width="250" height="92" rx="8" fill="#e8eef6" stroke="#1e3a5f" stroke-width="1.8"/>
+  <text x="165" y="100" text-anchor="middle" class="lab">2010–2012</text>
+  <text x="165" y="124" text-anchor="middle" class="txt">Fix 30 CPC candidates</text>
+  <text x="165" y="146" text-anchor="middle" class="note">Burn-in only</text>
+  <rect x="310" y="70" width="420" height="92" rx="8" fill="#d9e4f2" stroke="#1e3a5f" stroke-width="1.8"/>
+  <text x="520" y="100" text-anchor="middle" class="lab">2013–2019</text>
+  <text x="520" y="124" text-anchor="middle" class="txt">1,540,698 training pairs</text>
+  <text x="520" y="146" text-anchor="middle" class="note">2019 used for thresholds</text>
+  <rect x="750" y="70" width="160" height="92" rx="8" fill="#f4eee4" stroke="#7a5b20" stroke-width="1.8"/>
+  <text x="830" y="100" text-anchor="middle" class="lab">2020</text>
+  <text x="830" y="124" text-anchor="middle" class="txt">Embargo</text>
+  <text x="830" y="146" text-anchor="middle" class="note">Unused year</text>
+  <rect x="930" y="70" width="360" height="92" rx="8" fill="#dceee3" stroke="#215c3a" stroke-width="1.8"/>
+  <text x="1110" y="100" text-anchor="middle" class="lab">2021–2022</text>
+  <text x="1110" y="124" text-anchor="middle" class="txt">455,458 pairs; 10,411 firms</text>
+  <text x="1110" y="146" text-anchor="middle" class="note">Labels unused in fitting</text>
+  <text x="40" y="196" class="note">M1 and M2 use activity features only. M3 adds common-neighbor, peer-adoption, and degree features. A second chronological cutoff was not run.</text>
 </svg>
