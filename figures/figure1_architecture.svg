@@ -1,1 +1,89 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620"><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#49627a"/></marker><style>.h{font:700 28px Arial;fill:#132b3e}.sub{font:18px Arial;fill:#41566a}.box{stroke:#49627a;stroke-width:2;rx:16}.head{font:700 19px Arial;fill:#132b3e}.body{font:16px Arial;fill:#31495e}.edge{stroke:#49627a;stroke-width:2.5;fill:none;marker-end:url(#arrow)}.small{font:15px Arial;fill:#526a7e}</style></defs><rect width="1400" height="620" fill="#fbfdff"/><text x="55" y="55" class="h">Knowledge-graph-enhanced entrepreneurial innovation prediction</text><text x="55" y="86" class="sub">Explicit firm–technology relations are converted into temporally valid features and tested against strong tabular baselines.</text><rect x="50" y="130" width="275" height="155" fill="#eaf2fb" class="box"/><text x="75" y="165" class="head">1  Time-stamped inputs</text><text x="75" y="198" class="body">Firm-year attributes</text><text x="75" y="224" class="body">Digital and analytics capability</text><text x="75" y="250" class="body">R&amp;D, industry, prior innovation</text><rect x="365" y="130" width="285" height="155" fill="#e8f6f1" class="box"/><text x="390" y="165" class="head">2  Relational knowledge</text><text x="390" y="198" class="body">Firm ↔ technology concepts</text><text x="390" y="224" class="body">Industry and peer relations</text><text x="390" y="250" class="body">Timestamped edges</text><rect x="690" y="130" width="300" height="155" fill="#fff3df" class="box"/><text x="715" y="165" class="head">3  Leakage-safe features</text><text x="715" y="198" class="body">Technology diversity</text><text x="715" y="224" class="body">Historical technology-peer signal</text><text x="715" y="250" class="body">Historical industry-peer signal</text><rect x="1030" y="130" width="320" height="155" fill="#f2ecfb" class="box"/><text x="1055" y="165" class="head">4  Controlled comparison</text><text x="1055" y="198" class="body">Logistic regression</text><text x="1055" y="224" class="body">Random forest vs. graph-enhanced RF</text><text x="1055" y="250" class="body">Same chronological holdout</text><path d="M325 207 H357" class="edge"/><path d="M650 207 H682" class="edge"/><path d="M990 207 H1022" class="edge"/><rect x="160" y="355" width="1080" height="175" fill="#fff" stroke="#9db0c0" stroke-width="2" rx="18"/><text x="195" y="395" class="head">5  Evaluation and decision relevance</text><g><rect x="195" y="420" width="220" height="68" fill="#f5f8fb" stroke="#c3d0dc" rx="10"/><text x="305" y="447" text-anchor="middle" class="body">Discrimination</text><text x="305" y="470" text-anchor="middle" class="small">ROC-AUC / AP</text><rect x="435" y="420" width="220" height="68" fill="#f5f8fb" stroke="#c3d0dc" rx="10"/><text x="545" y="447" text-anchor="middle" class="body">Calibration</text><text x="545" y="470" text-anchor="middle" class="small">Brier / reliability</text><rect x="675" y="420" width="220" height="68" fill="#f5f8fb" stroke="#c3d0dc" rx="10"/><text x="785" y="447" text-anchor="middle" class="body">Incremental value</text><text x="785" y="470" text-anchor="middle" class="small">Paired bootstrap CI</text><rect x="915" y="420" width="285" height="68" fill="#f5f8fb" stroke="#c3d0dc" rx="10"/><text x="1057" y="447" text-anchor="middle" class="body">Robustness</text><text x="1057" y="470" text-anchor="middle" class="small">Time splits / ablation</text></g><path d="M1190 285 V325 H700 V347" class="edge"/><text x="55" y="580" class="small">Design principle: every feature must be available at prediction time; relational complexity is justified only by measured out-of-time value.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#3d5a73"/>
+    </marker>
+    <style>
+      .h { font: 700 26px Arial, Helvetica, sans-serif; fill: #132b3e; }
+      .sub { font: 16px Arial, Helvetica, sans-serif; fill: #4a6275; }
+      .head { font: 700 17px Arial, Helvetica, sans-serif; fill: #132b3e; }
+      .body { font: 14.5px Arial, Helvetica, sans-serif; fill: #31495e; }
+      .tiny { font: 13px Arial, Helvetica, sans-serif; fill: #526a7e; }
+      .lab { font: 700 14px Arial, Helvetica, sans-serif; fill: #132b3e; }
+      .box { stroke: #3d5a73; stroke-width: 1.8; }
+      .edge { stroke: #3d5a73; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1400" height="760" fill="#fbfdff"/>
+  <text x="48" y="48" class="h">Firm–technology knowledge graph for next-year CPC entry</text>
+  <text x="48" y="76" class="sub">USPTO PatentsView grant records are converted into a time-indexed graph. Features at year t use only edges observed through t.</text>
+
+  <rect x="48" y="108" width="292" height="188" rx="14" fill="#eaf2fb" class="box"/>
+  <text x="68" y="140" class="head">1. PatentsView inputs</text>
+  <text x="68" y="168" class="body">g_patent (utility, grant year)</text>
+  <text x="68" y="190" class="body">g_assignee_disambiguated</text>
+  <text x="68" y="212" class="body">g_cpc_current (subclass)</text>
+  <text x="68" y="242" class="tiny">Join on patent_id</text>
+  <text x="68" y="264" class="tiny">Output: firm_id, year, cpc_code</text>
+
+  <rect x="385" y="108" width="292" height="188" rx="14" fill="#e8f6f1" class="box"/>
+  <text x="405" y="140" class="head">2. Time-indexed graph G_t</text>
+  <text x="405" y="168" class="body">Nodes: firms and 30 CPC classes</text>
+  <text x="405" y="190" class="body">Edges: firm–class grants ≤ t</text>
+  <text x="405" y="212" class="body">Class–class co-occurrence ≤ t</text>
+  <text x="405" y="242" class="tiny">Candidate classes fixed in 2010–2012</text>
+  <text x="405" y="264" class="tiny">Future edges never enter features</text>
+
+  <rect x="722" y="108" width="292" height="188" rx="14" fill="#fff3df" class="box"/>
+  <text x="742" y="140" class="head">3. Leakage-safe features</text>
+  <text x="742" y="168" class="body">Tabular: portfolio size, activity,</text>
+  <text x="742" y="190" class="body">class prevalence, recent growth</text>
+  <text x="742" y="220" class="body">Graph: common neighbours,</text>
+  <text x="742" y="242" class="body">peer adoption, class degree</text>
+  <text x="742" y="270" class="tiny">All computed from records ≤ t</text>
+
+  <rect x="1059" y="108" width="293" height="188" rx="14" fill="#f2ecfb" class="box"/>
+  <text x="1079" y="140" class="head">4. Controlled comparison</text>
+  <text x="1079" y="168" class="body">M1 logistic (tabular only)</text>
+  <text x="1079" y="190" class="body">M2 random forest (tabular only)</text>
+  <text x="1079" y="212" class="body">M3 forest + graph features</text>
+  <text x="1079" y="242" class="tiny">Same firm–class pairs</text>
+  <text x="1079" y="264" class="tiny">Threshold tuned on 2019 only</text>
+
+  <path d="M340 202 H377" class="edge"/>
+  <path d="M677 202 H714" class="edge"/>
+  <path d="M1014 202 H1051" class="edge"/>
+
+  <text x="48" y="340" class="head">5. Chronological protocol used in this paper</text>
+  <rect x="48" y="358" width="1304" height="18" rx="4" fill="#d7e3ee"/>
+
+  <rect x="48" y="392" width="250" height="118" rx="12" fill="#e8eef5" stroke="#5b7388" stroke-width="1.8"/>
+  <text x="173" y="428" text-anchor="middle" class="lab">Burn-in</text>
+  <text x="173" y="452" text-anchor="middle" class="body">2010–2012</text>
+  <text x="173" y="478" text-anchor="middle" class="tiny">Fix 30 CPC candidates</text>
+
+  <rect x="318" y="392" width="430" height="118" rx="12" fill="#dceafe" stroke="#315d91" stroke-width="1.8"/>
+  <text x="533" y="428" text-anchor="middle" class="lab">Training prediction years</text>
+  <text x="533" y="452" text-anchor="middle" class="body">2013–2019  ·  1,540,698 pairs</text>
+  <text x="533" y="478" text-anchor="middle" class="tiny">Fit models; choose threshold on 2019</text>
+
+  <rect x="768" y="392" width="210" height="118" rx="12" fill="#fff0d4" stroke="#a56a12" stroke-width="1.8"/>
+  <text x="873" y="428" text-anchor="middle" class="lab">Embargo</text>
+  <text x="873" y="452" text-anchor="middle" class="body">2020</text>
+  <text x="873" y="478" text-anchor="middle" class="tiny">No train/test overlap</text>
+
+  <rect x="998" y="392" width="354" height="118" rx="12" fill="#d9f4e5" stroke="#28734d" stroke-width="1.8"/>
+  <text x="1175" y="428" text-anchor="middle" class="lab">Held-out test</text>
+  <text x="1175" y="452" text-anchor="middle" class="body">2021–2022  ·  455,458 pairs</text>
+  <text x="1175" y="478" text-anchor="middle" class="tiny">Score entry in t+1; never used in fitting</text>
+
+  <path d="M298 451 H310" class="edge"/>
+  <path d="M748 451 H760" class="edge"/>
+  <path d="M978 451 H990" class="edge"/>
+
+  <rect x="48" y="540" width="1304" height="150" rx="14" fill="#ffffff" stroke="#9db0c0" stroke-width="1.6"/>
+  <text x="72" y="576" class="head">Decision-support use</text>
+  <text x="72" y="606" class="body">The system ranks previously unadopted CPC subclasses for a firm at year-end t, using only information that would have been observable then.</text>
+  <text x="72" y="632" class="body">Primary test: does the graph-feature block raise average precision relative to the same random forest without those features?</text>
+  <text x="72" y="662" class="tiny">Not claimed: causal effects of entering a class, commercial success, or prediction of technologies absent from the burn-in window.</text>
+</svg>

@@ -180,6 +180,76 @@ def metrics(y, p, threshold=.5):
     }
 
 
+def save_results_figure(res, delta, path, demo=False):
+    """Two-panel journal figure: average precision vs chance, then ranking metrics."""
+    order = ["M1_logistic", "M2_random_forest", "M3_graph_features"]
+    res = res.set_index("model").loc[order]
+    labels = ["M1\nLogistic", "M2\nRandom forest", "M3\nGraph-feature\nforest"]
+    colors = ["#4C6A87", "#C47B2B", "#2F6B4F"]
+    prevalence = float(res["test_positive_prevalence"].iloc[0])
+    ap = res["average_precision"].tolist()
+    auc = res["roc_auc"].tolist()
+    ba = res["balanced_accuracy"].tolist()
+
+    plt.rcParams.update({
+        "font.family": "DejaVu Sans",
+        "font.size": 11,
+        "axes.linewidth": 0.8,
+        "pdf.fonttype": 42,
+        "ps.fonttype": 42,
+    })
+    fig, axes = plt.subplots(1, 2, figsize=(11.4, 4.7))
+    x = np.arange(3)
+
+    ax = axes[0]
+    ax.bar(x, ap, color=colors, width=0.64, zorder=3)
+    ax.axhline(prevalence, color="#5b6773", linestyle="--", linewidth=1.3, zorder=2,
+               label=f"Chance (prevalence = {prevalence:.3f})")
+    ax.set_ylim(0, max(0.05, max(ap) * 1.45))
+    ax.set_xticks(x, labels)
+    ax.set_ylabel("Average precision")
+    title_a = "A  Synthetic smoke test" if demo else "A  Ranking quality on 2021–2022 entry"
+    ax.set_title(title_a, loc="left", fontweight="bold", fontsize=12, pad=10)
+    ax.yaxis.grid(True, color="#e3e8ed", linewidth=0.8, zorder=0)
+    ax.set_axisbelow(True)
+    for i, value in enumerate(ap):
+        ax.text(i, value + max(ap) * 0.04, f"{value:.3f}", ha="center", va="bottom", fontsize=10)
+    ax.legend(frameon=False, loc="upper left")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    if not demo and np.isfinite(delta.get("delta_ap", np.nan)):
+        ax.text(0.98, 0.96,
+                f"M3 − M2 = {delta['delta_ap']:.3f}\n95% CI {delta['ci_low']:.3f}–{delta['ci_high']:.3f}",
+                transform=ax.transAxes, ha="right", va="top", fontsize=9.5, color="#2F6B4F",
+                bbox=dict(boxstyle="round,pad=0.35", facecolor="#eef6f1", edgecolor="#b7d2c4", linewidth=0.8))
+
+    ax = axes[1]
+    width = 0.36
+    ax.bar(x - width / 2, auc, width=width, color="#3d5a73", zorder=3, label="ROC-AUC")
+    ax.bar(x + width / 2, ba, width=width, color="#9eb6c6", zorder=3, label="Balanced accuracy")
+    ax.set_ylim(0.5, 0.85)
+    ax.set_xticks(x, labels)
+    ax.set_ylabel("Score")
+    title_b = "B  Synthetic smoke test" if demo else "B  Secondary ranking metrics"
+    ax.set_title(title_b, loc="left", fontweight="bold", fontsize=12, pad=10)
+    ax.yaxis.grid(True, color="#e3e8ed", linewidth=0.8, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(frameon=False, loc="upper left")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    for i, value in enumerate(auc):
+        ax.text(i - width / 2, value + 0.008, f"{value:.3f}", ha="center", va="bottom", fontsize=8.5, color="#1f3344")
+    for i, value in enumerate(ba):
+        ax.text(i + width / 2, value + 0.008, f"{value:.3f}", ha="center", va="bottom", fontsize=8.5, color="#1f3344")
+
+    fig.tight_layout(w_pad=2.2)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor="white")
+    fig.savefig(path.with_suffix(".svg"), bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+
 def paired_bootstrap(y, p_new, p_base, groups, n_boot=1000, seed=SEED):
     """Paired cluster bootstrap: resample firms, retaining all their held-out pairs."""
     rng = np.random.default_rng(seed)
@@ -257,16 +327,8 @@ def main():
                    **delta, "bootstrap_replicates_requested": args.bootstrap,
                    "note": "Paired cluster bootstrap resamples firms and retains all held-out pairs."}]).to_csv(
                        args.outdir / "paired_bootstrap.csv", index=False)
-    # Two-panel visual is intentionally avoided: one clean performance figure.
-    ax = res.set_index("model")[["average_precision", "roc_auc", "balanced_accuracy"]].plot(
-        kind="bar", figsize=(9.5, 5.4), ylim=(0, 1), rot=8)
-    ax.set_ylabel("Score (higher is better)")
-    ax.set_title("Synthetic smoke test — not empirical evidence" if args.demo else "Future-period technology-entry prediction")
-    ax.grid(axis="y", alpha=.25)
-    ax.legend(loc="lower right", frameon=False)
-    plt.tight_layout()
-    plt.savefig(args.outdir / "figure2_model_comparison.png", dpi=300, bbox_inches="tight")
-    plt.close()
+    save_results_figure(res, delta, args.outdir / "figure2_results.png", demo=args.demo)
+    plt.close("all")
     summary = [
         f"mode={'synthetic demo only' if args.demo else 'real input CSV'}",
         f"source_rows={len(df)}", f"candidate_panel_rows={len(panel)}",
