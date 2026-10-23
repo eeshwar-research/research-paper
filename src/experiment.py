@@ -113,13 +113,17 @@ def make_candidate_panel(df, max_technologies=30, min_firms=3):
         recent = df[(df.year <= pred_year) & (df.year >= pred_year - 1)].groupby("cpc_code").firm_id.nunique().to_dict()
         prior = df[(df.year <= pred_year - 2) & (df.year >= pred_year - 3)].groupby("cpc_code").firm_id.nunique().to_dict()
         total_firms = max(1, len(hist_portfolios))
+        tech_to_firms = {}
+        for other, op in hist_portfolios.items():
+            for tech in op:
+                tech_to_firms.setdefault(tech, set()).add(other)
+        patent_counts = history.groupby("firm_id").size().to_dict()
         for firm, portfolio in hist_portfolios.items():
             if len(portfolio) == 0:
                 continue
-            patent_count = int(history.loc[history.firm_id == firm].shape[0])
-            # Neighbour firms share >=1 observed class with this firm as of t.
-            peer_firms = {other for other, op in hist_portfolios.items()
-                          if other != firm and portfolio.intersection(op)}
+            patent_count = int(patent_counts.get(firm, 0))
+            # Inverted index avoids an O(number_of_firms^2) peer scan.
+            peer_firms = set().union(*(tech_to_firms.get(tech, set()) for tech in portfolio)) - {firm}
             peer_den = max(1, len(peer_firms))
             for candidate in tech_universe:
                 if candidate in portfolio:
@@ -174,13 +178,16 @@ def metrics(y, p, threshold=.5):
     }
 
 
-def paired_bootstrap(y, p_new, p_base, n_boot=1000, seed=SEED):
-    """Paired row bootstrap; cluster bootstrap by firm is recommended for final paper."""
+def paired_bootstrap(y, p_new, p_base, groups, n_boot=1000, seed=SEED):
+    """Paired cluster bootstrap: resample firms, retaining all their held-out pairs."""
     rng = np.random.default_rng(seed)
-    y, p_new, p_base = np.asarray(y, int), np.asarray(p_new), np.asarray(p_base)
+    y, p_new, p_base, groups = np.asarray(y, int), np.asarray(p_new), np.asarray(p_base), np.asarray(groups)
+    unique_groups = np.unique(groups)
+    members = {g: np.flatnonzero(groups == g) for g in unique_groups}
     vals = []
     for _ in range(n_boot):
-        idx = rng.integers(0, len(y), len(y))
+        sampled = rng.choice(unique_groups, size=len(unique_groups), replace=True)
+        idx = np.concatenate([members[g] for g in sampled])
         if len(np.unique(y[idx])) < 2:
             continue
         vals.append(average_precision_score(y[idx], p_new[idx]) -
@@ -215,8 +222,13 @@ def main():
         "M3_graph_features": ("forest", BASE + GRAPH),
     }
     results, probs = [], {}
-    # Threshold is set on training data only using a separate stratified validation split.
-    tr_fit, tr_val = train_test_split(train, test_size=.2, random_state=SEED, stratify=train.target)
+    # Threshold is selected on the latest training prediction year (temporal validation),
+    # never by random row splitting or by inspecting the final test period.
+    validation_year = max(train_years)
+    tr_fit = train[train.prediction_year < validation_year]
+    tr_val = train[train.prediction_year == validation_year]
+    if tr_fit.empty or tr_val.empty or tr_fit.target.nunique() < 2 or tr_val.target.nunique() < 2:
+        raise ValueError("Temporal threshold-validation split lacks both classes; extend the time span or revise the pre-specified split.")
     threshold_by_model = {}
     for name, (kind, features) in specs.items():
         val_model = build_model(kind, features).fit(tr_fit[features], tr_fit.target)
@@ -237,10 +249,11 @@ def main():
     res = pd.DataFrame(results)
     res.to_csv(args.outdir / "metrics.csv", index=False)
     delta = paired_bootstrap(test.target, probs["M3_graph_features"],
-                             probs["M2_random_forest"], n_boot=args.bootstrap)
+                             probs["M2_random_forest"], test.firm_id,
+                             n_boot=args.bootstrap)
     pd.DataFrame([{"comparison": "M3 minus M2", "primary_metric": "average_precision",
                    **delta, "bootstrap_replicates_requested": args.bootstrap,
-                   "note": "Row bootstrap is provisional; final inference should cluster by firm."}]).to_csv(
+                   "note": "Paired cluster bootstrap resamples firms and retains all held-out pairs."}]).to_csv(
                        args.outdir / "paired_bootstrap.csv", index=False)
     # Two-panel visual is intentionally avoided: one clean performance figure.
     ax = res.set_index("model")[["average_precision", "roc_auc", "balanced_accuracy"]].plot(
