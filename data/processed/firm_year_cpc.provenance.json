@@ -1,0 +1,76 @@
+{
+  "source_name": "USPTO PatentsView granted-patent metadata, Zenodo archive",
+  "source_record": "https://zenodo.org/records/15058362",
+  "source_doi": "10.5281/zenodo.15058362",
+  "coverage_note": "Granted patents and related tables through 31 December 2024.",
+  "download_started_utc": "2026-10-23T18:54:57.357955+00:00",
+  "download_finished_utc": "2026-10-23T18:55:37.886184+00:00",
+  "join_key": "patent_id",
+  "tables": {
+    "g_patent": "utility patents; year = grant-year from patent_date; withdrawn patents excluded",
+    "g_assignee_disambiguated": "firm_id = PatentsView assignee_id; organizations only (non-empty organization name); joint assignees create multiple firm-technology rows",
+    "g_cpc_current": "cpc_code = 4-character CPC subclass from cpc_subclass, current classification; Y10 indexing codes associated with former USPC are excluded"
+  },
+  "inclusion": {
+    "patent_type": "utility",
+    "year_field": "grant year",
+    "year_start": 2010,
+    "year_end": 2023,
+    "assignee_rule": "disambiguated organization assignees",
+    "min_distinct_years_per_firm": 8,
+    "min_distinct_subclasses_per_firm": 8,
+    "min_firm_year_cpc_rows_per_firm": 20,
+    "digital_activity_filter": "firm has at least one G or H CPC subclass in the window",
+    "excluded_cpc": "Y10* former-USPC indexing subclasses"
+  },
+  "files": {
+    "g_patent.tsv.zip": {
+      "zip_path": "/workspace/data/raw/g_patent.tsv.zip",
+      "zip_bytes": 223192856,
+      "md5": "f74fbde4b2adbf980b8e4ed5394f16d2",
+      "tsv_path": "/workspace/data/raw/g_patent.tsv",
+      "tsv_bytes": 1077805005
+    },
+    "g_assignee_disambiguated.tsv.zip": {
+      "zip_path": "/workspace/data/raw/g_assignee_disambiguated.tsv.zip",
+      "zip_bytes": 346950350,
+      "md5": "7fa0f23627570ce599d81d6fbb97fb98",
+      "tsv_path": "/workspace/data/raw/g_assignee_disambiguated.tsv",
+      "tsv_bytes": 1060163802
+    },
+    "g_cpc_current.tsv.zip": {
+      "zip_path": "/workspace/data/raw/g_cpc_current.tsv.zip",
+      "zip_bytes": 485195636,
+      "md5": "8211b681c392b2810b5a848e1fcfa308",
+      "tsv_path": "/workspace/data/raw/g_cpc_current.tsv",
+      "tsv_bytes": 3209532489
+    }
+  },
+  "stats": {
+    "utility_patents_in_window": 4172614,
+    "organization_assignee_ids": 497513,
+    "patents_with_organization_assignee": 8025467,
+    "patent_cpc_subclass_pairs": 16290944,
+    "before_firm_filters": {
+      "rows": 2856703,
+      "firms": 235876,
+      "years": 14,
+      "subclasses": 672,
+      "year_min": 2010,
+      "year_max": 2023
+    },
+    "after_firm_filters": {
+      "rows": 1453416,
+      "firms": 10878,
+      "years": 14,
+      "subclasses": 668,
+      "year_min": 2010,
+      "year_max": 2023
+    },
+    "output_csv": "/workspace/data/processed/firm_year_cpc.csv",
+    "output_bytes": 68310574,
+    "output_md5": "964fa28871f241d3083b97de4e177b31",
+    "output_csv_gz": "data/processed/firm_year_cpc.csv.gz",
+    "output_csv_gz_md5": "39918b01061ec5c8f557e4d2a104aad8"
+  }
+}

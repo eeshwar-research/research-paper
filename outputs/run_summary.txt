@@ -1,0 +1,13 @@
+mode=real input CSV
+source_rows=1453416
+candidate_panel_rows=2225881
+candidate_classes=30
+burn_in_years=[2010, 2011, 2012]
+train_prediction_years=[2013, 2014, 2015, 2016, 2017, 2018, 2019]
+embargo_prediction_years=[2020]
+test_prediction_years=[2021, 2022]
+train_pairs=1540698
+test_pairs=455458
+test_firms=10411
+test_prevalence=0.011103
+warning=verify data provenance, firm linkage, timing, and cluster-level uncertainty
