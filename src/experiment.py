@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch  # used only in the matplotlib figure fallback
 
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -202,8 +202,28 @@ def paired_bootstrap(y, p_new, p_base, groups, n_boot=1000, seed=SEED):
 
 
 def write_protocol_figures(figdir: Path):
-    """Publication figures for the architecture and temporal protocol. Not results."""
+    """Export manuscript Fig. 1–2. Does not invent model scores.
+
+    SVG files in figdir are the source of truth for the Markdown manuscript.
+    When cairosvg is available, PDF/PNG are rendered from those SVGs so artwork
+    cannot drift from the diagrams in paper.md. Otherwise a matplotlib fallback
+    draws the same protocol labels.
+    """
     figdir.mkdir(parents=True, exist_ok=True)
+    svg_names = ("figure1_architecture.svg", "figure2_evaluation.svg")
+    svg_paths = [figdir / name for name in svg_names]
+    if all(path.exists() for path in svg_paths):
+        try:
+            import cairosvg
+        except ImportError:
+            cairosvg = None
+        if cairosvg is not None:
+            for svg_path in svg_paths:
+                stem = svg_path.with_suffix("")
+                cairosvg.svg2pdf(url=str(svg_path), write_to=str(stem.with_suffix(".pdf")))
+                cairosvg.svg2png(url=str(svg_path), write_to=str(stem.with_suffix(".png")), scale=3)
+            return
+
     plt.rcParams.update({
         "font.family": "DejaVu Sans",
         "axes.linewidth": 0.8,
@@ -211,90 +231,70 @@ def write_protocol_figures(figdir: Path):
         "ps.fonttype": 42,
     })
 
-    def box(ax, x, y, w, h, title, lines, facecolor):
+    def box(ax, x, y, w, h, title, lines, facecolor, edge="#1e3a5f"):
         patch = FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.08",
-                               facecolor=facecolor, edgecolor="#315d91", linewidth=1.4)
+                               facecolor=facecolor, edgecolor=edge, linewidth=1.3)
         ax.add_patch(patch)
-        ax.text(x + 0.04, y + h - 0.10, title, fontsize=11, fontweight="bold", color="#132b3e", va="top")
+        ax.text(x + 0.06, y + h - 0.12, title, fontsize=10.5, fontweight="bold", color="#0f172a", va="top")
         for i, line in enumerate(lines):
-            ax.text(x + 0.04, y + h - 0.28 - 0.16 * i, line, fontsize=9.2, color="#31495e", va="top")
+            ax.text(x + 0.06, y + h - 0.38 - 0.22 * i, line, fontsize=8.8, color="#1e293b", va="top")
 
-    fig, ax = plt.subplots(figsize=(11.2, 3.4))
+    fig, ax = plt.subplots(figsize=(11.2, 2.7))
     ax.set_xlim(0, 12)
-    ax.set_ylim(0, 6)
+    ax.set_ylim(0, 4.4)
     ax.axis("off")
-    ax.text(0.2, 5.7, "Knowledge-graph feature pipeline for firm-specific technology-entry prediction",
-            fontsize=13, fontweight="bold", color="#132b3e")
-    ax.text(0.2, 5.32, "Every feature at prediction year t uses only records dated <= t; the target is first CPC-subclass entry in t+1.",
-            fontsize=9.2, color="#41566a")
-    box(ax, 0.25, 2.55, 2.7, 2.4, "1  Time-stamped inputs",
-        ["firm_id, year, cpc_code", "USPTO PatentsView", "Normalized CPC subclass"], "#eaf2fb")
-    box(ax, 3.25, 2.55, 2.7, 2.4, "2  Graph G_t",
-        ["Firms and CPC classes", "Edges observed by t", "Co-occurrence among classes"], "#e8f6f1")
-    box(ax, 6.25, 2.55, 2.7, 2.4, "3  Inspectable features",
-        ["Portfolio size, activity", "Class prevalence, growth", "CN, peer rate, degree"], "#fff3df")
-    box(ax, 9.25, 2.55, 2.5, 2.4, "4  Controlled models",
-        ["M1 logistic regression", "M2 random forest", "M3 graph-feature RF"], "#f2ecfb")
-    for x0, x1 in ((2.95, 3.25), (5.95, 6.25), (8.95, 9.25)):
-        ax.add_patch(FancyArrowPatch((x0, 3.75), (x1, 3.75), arrowstyle="-|>", mutation_scale=10,
-                                     color="#49627a", linewidth=1.5))
-    eval_box = FancyBboxPatch((0.25, 0.25), 11.5, 2.0, boxstyle="round,pad=0.02,rounding_size=0.08",
-                              facecolor="#ffffff", edgecolor="#9db0c0", linewidth=1.3)
+    box(ax, 0.15, 2.15, 2.7, 2.05, "1  PatentsView grants",
+        ["Organization assignees", "Grant years 2010–2023", "CPC subclass (four characters)",
+         "firm_id, year, cpc_code"], "#e8eef6")
+    box(ax, 3.15, 2.15, 2.7, 2.05, "2  Graph G_t",
+        ["Firm–class edges dated ≤ t", "Class co-occurrence in C", "Candidates frozen in 2010–2012",
+         "No future edges in features"], "#e7f2ea")
+    box(ax, 6.15, 2.15, 2.7, 2.05, "3  Feature blocks",
+        ["Size, activity, prevalence, growth", "Common-neighbor; peer adoption",
+         "Candidate co-occurrence degree", "Graph block used only in M3"], "#f4eee4")
+    box(ax, 9.15, 2.15, 2.7, 2.05, "4  Same-candidate models",
+        ["M1 logistic regression", "M2 tabular random forest", "M3 forest + graph features",
+         "Primary contrast: M3 versus M2"], "#eee8f4")
+    for x0, x1 in ((2.85, 3.15), (5.85, 6.15), (8.85, 9.15)):
+        ax.add_patch(FancyArrowPatch((x0, 3.15), (x1, 3.15), arrowstyle="-|>", mutation_scale=10,
+                                     color="#334155", linewidth=1.4))
+    eval_box = FancyBboxPatch((0.15, 0.12), 11.7, 1.85, boxstyle="round,pad=0.02,rounding_size=0.08",
+                              facecolor="#ffffff", edgecolor="#64748b", linewidth=1.3)
     ax.add_patch(eval_box)
-    ax.text(0.45, 1.95, "5  Shared evaluation", fontsize=11, fontweight="bold", color="#132b3e")
-    for i, (title, note) in enumerate([
-        ("Discrimination", "Average precision + prevalence"),
-        ("Calibration", "Brier score"),
-        ("Incremental value", "Firm-clustered bootstrap"),
-        ("Executed split", "One embargoed holdout"),
-    ]):
-        x = 0.5 + i * 2.85
-        inner = FancyBboxPatch((x, 0.45), 2.6, 1.15, boxstyle="round,pad=0.02,rounding_size=0.06",
-                               facecolor="#f5f8fb", edgecolor="#c3d0dc", linewidth=1.0)
-        ax.add_patch(inner)
-        ax.text(x + 1.3, 1.2, title, ha="center", fontsize=10, fontweight="bold", color="#132b3e")
-        ax.text(x + 1.3, 0.85, note, ha="center", fontsize=8.6, color="#526a7e")
+    ax.text(0.3, 1.7, "5  Executed holdout", fontsize=10.5, fontweight="bold", color="#0f172a")
+    ax.text(0.3, 1.28, "Train 2013–2019 (1,540,698 pairs) · embargo 2020 · test 2021–2022 (455,458 pairs; 10,411 firms; 1.11% positives)",
+            fontsize=8.6, color="#1e293b")
+    ax.text(0.3, 0.88, "Primary metric: average precision. Uncertainty: firm-cluster bootstrap for M3 − M2.",
+            fontsize=8.6, color="#1e293b")
+    ax.text(0.3, 0.48, "Every feature at year t uses records dated ≤ t. The label is first CPC-subclass entry in t+1.",
+            fontsize=8.2, color="#334155")
     fig.tight_layout()
     fig.savefig(figdir / "figure1_architecture.pdf", bbox_inches="tight")
     fig.savefig(figdir / "figure1_architecture.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(11.2, 3.0))
+    fig, ax = plt.subplots(figsize=(11.2, 2.0))
     ax.set_xlim(0, 12)
-    ax.set_ylim(0, 6)
+    ax.set_ylim(0, 3.2)
     ax.axis("off")
-    ax.text(0.2, 5.7, "Leakage-aware temporal evaluation protocol",
-            fontsize=13, fontweight="bold", color="#132b3e")
-    ax.text(0.2, 5.32, "Predict from information available at time t; score outcomes only after the cutoff and embargo.",
-            fontsize=9.2, color="#41566a")
-    ax.annotate("", xy=(11.6, 4.55), xytext=(0.4, 4.55),
-                arrowprops=dict(arrowstyle="-|>", color="#49627a", lw=1.8))
+    ax.annotate("", xy=(11.7, 2.85), xytext=(0.25, 2.85),
+                arrowprops=dict(arrowstyle="-|>", color="#334155", lw=1.6))
     periods = [
-        (0.4, 3.2, "#dceafe", "#315d91", "Burn-in (3 years)", "Freeze candidate CPC universe"),
-        (3.7, 3.6, "#cfe4d8", "#28734d", "Training years", "Labels end before embargo"),
-        (7.4, 1.7, "#fff0d4", "#a56a12", "Embargo", "One unused year"),
-        (9.2, 2.4, "#d9f4e5", "#28734d", "Future test", "Last two prediction years"),
+        (0.25, 2.15, "#e8eef6", "#1e3a5f", "2010–2012", "Fix 30 CPC candidates", "Burn-in only"),
+        (2.55, 3.55, "#d9e4f2", "#1e3a5f", "2013–2019", "1,540,698 training pairs", "2019 used for thresholds"),
+        (6.25, 1.4, "#f4eee4", "#7a5b20", "2020", "Embargo", "Unused year"),
+        (7.8, 3.95, "#dceee3", "#215c3a", "2021–2022", "455,458 pairs; 10,411 firms", "Labels unused in fitting"),
     ]
-    for x, w, face, edge, title, note in periods:
-        patch = FancyBboxPatch((x, 3.85), w, 1.15, boxstyle="round,pad=0.02,rounding_size=0.06",
+    for x, w, face, edge, title, note, sub in periods:
+        patch = FancyBboxPatch((x, 1.15), w, 1.45, boxstyle="round,pad=0.02,rounding_size=0.06",
                                facecolor=face, edgecolor=edge, linewidth=1.3)
         ax.add_patch(patch)
-        ax.text(x + w / 2, 4.6, title, ha="center", fontsize=10, fontweight="bold", color="#132b3e")
-        ax.text(x + w / 2, 4.2, note, ha="center", fontsize=8.4, color="#31495e")
-    steps = [
-        (0.4, "A. Fit", ["Imputation and scaling", "Model parameters", "Historical graph rates"]),
-        (4.2, "B. Compare", ["M1 logistic baseline", "M2 tabular random forest", "M3 graph-feature RF"]),
-        (8.0, "C. Report", ["Average precision, ROC-AUC", "Balanced accuracy, Brier", "Firm-clustered intervals"]),
-    ]
-    for x, title, lines in steps:
-        patch = FancyBboxPatch((x, 0.45), 3.5, 2.7, boxstyle="round,pad=0.02,rounding_size=0.08",
-                               facecolor="#ffffff", edgecolor="#9db0c0", linewidth=1.3)
-        ax.add_patch(patch)
-        ax.text(x + 0.18, 2.8, title, fontsize=11, fontweight="bold", color="#132b3e")
-        for i, line in enumerate(lines):
-            ax.text(x + 0.18, 2.3 - 0.45 * i, line, fontsize=9.4, color="#31495e")
-    ax.text(0.4, 0.15, "This diagram defines the protocol; it is not a report of measured model performance.",
-            fontsize=8.5, color="#526a7e")
+        ax.text(x + w / 2, 2.25, title, ha="center", fontsize=10, fontweight="bold", color="#0f172a")
+        ax.text(x + w / 2, 1.85, note, ha="center", fontsize=8.4, color="#1e293b")
+        ax.text(x + w / 2, 1.5, sub, ha="center", fontsize=8.0, color="#334155")
+    ax.text(0.25, 0.45,
+            "M1 and M2 use activity features only. M3 adds common-neighbor, peer-adoption, and degree features. A second chronological cutoff was not run.",
+            fontsize=8.2, color="#334155")
     fig.tight_layout()
     fig.savefig(figdir / "figure2_evaluation.pdf", bbox_inches="tight")
     fig.savefig(figdir / "figure2_evaluation.png", dpi=300, bbox_inches="tight")

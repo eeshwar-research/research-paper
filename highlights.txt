@@ -1,6 +1,6 @@
 Highlights
 - Temporally valid graph features are tested for firm technology-entry.
 - A many-firm PatentsView holdout uses an embargoed chronological split.
-- Graph features lift forest AP; logistic regression remains competitive.
+- Graph features lift forest AP 0.017; logistic remains competitive.
 - Absolute AP stays low against a 1.11% positive technology-entry rate.
 - Relational scores are inspectable inputs, not mandates to enter a class.
