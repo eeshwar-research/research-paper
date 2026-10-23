@@ -8,10 +8,10 @@ dated <= t; target is first entry into a candidate CPC subclass in t+1.
 from __future__ import annotations
 import argparse
 from pathlib import Path
-import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -20,7 +20,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import average_precision_score, roc_auc_score, balanced_accuracy_score, brier_score_loss
-from sklearn.model_selection import train_test_split
 
 SEED = 41
 BASE = ["firm_portfolio_size", "firm_activity_count", "candidate_prevalence", "candidate_recent_growth"]
@@ -73,6 +72,7 @@ def make_candidate_panel(df, max_technologies=30, min_firms=3):
     burn_years = years[:3]
     burn = df[df.year.isin(burn_years)]
     tech_counts = burn.groupby("cpc_code").firm_id.nunique().sort_values(ascending=False)
+    tech_counts = tech_counts[tech_counts >= min_firms]
     tech_universe = tech_counts.head(max_technologies).index.tolist()
     if len(tech_universe) < 5:
         raise ValueError("Fewer than five CPC subclasses occur in the initial three-year burn-in period.")
@@ -201,15 +201,121 @@ def paired_bootstrap(y, p_new, p_base, groups, n_boot=1000, seed=SEED):
             "ci_high": float(np.quantile(vals, .975))}
 
 
+def write_protocol_figures(figdir: Path):
+    """Publication figures for the architecture and temporal protocol. Not results."""
+    figdir.mkdir(parents=True, exist_ok=True)
+    plt.rcParams.update({
+        "font.family": "DejaVu Sans",
+        "axes.linewidth": 0.8,
+        "pdf.fonttype": 42,
+        "ps.fonttype": 42,
+    })
+
+    def box(ax, x, y, w, h, title, lines, facecolor):
+        patch = FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.08",
+                               facecolor=facecolor, edgecolor="#315d91", linewidth=1.4)
+        ax.add_patch(patch)
+        ax.text(x + 0.04, y + h - 0.10, title, fontsize=11, fontweight="bold", color="#132b3e", va="top")
+        for i, line in enumerate(lines):
+            ax.text(x + 0.04, y + h - 0.28 - 0.16 * i, line, fontsize=9.2, color="#31495e", va="top")
+
+    fig, ax = plt.subplots(figsize=(11.2, 5.4))
+    ax.set_xlim(0, 12)
+    ax.set_ylim(0, 6)
+    ax.axis("off")
+    ax.text(0.2, 5.7, "Knowledge-graph feature pipeline for firm-specific technology-entry prediction",
+            fontsize=13, fontweight="bold", color="#132b3e")
+    ax.text(0.2, 5.32, "Every feature at prediction year t uses only records dated <= t; the target is first CPC-subclass entry in t+1.",
+            fontsize=9.2, color="#41566a")
+    box(ax, 0.25, 2.55, 2.7, 2.4, "1  Time-stamped inputs",
+        ["firm_id, year, cpc_code", "USPTO PatentsView", "Normalized CPC subclass"], "#eaf2fb")
+    box(ax, 3.25, 2.55, 2.7, 2.4, "2  Graph G_t",
+        ["Firms and CPC classes", "Edges observed by t", "Co-occurrence among classes"], "#e8f6f1")
+    box(ax, 6.25, 2.55, 2.7, 2.4, "3  Inspectable features",
+        ["Portfolio size, activity", "Class prevalence, growth", "CN, peer rate, degree"], "#fff3df")
+    box(ax, 9.25, 2.55, 2.5, 2.4, "4  Controlled models",
+        ["M1 logistic regression", "M2 random forest", "M3 graph-feature RF"], "#f2ecfb")
+    for x0, x1 in ((2.95, 3.25), (5.95, 6.25), (8.95, 9.25)):
+        ax.add_patch(FancyArrowPatch((x0, 3.75), (x1, 3.75), arrowstyle="-|>", mutation_scale=10,
+                                     color="#49627a", linewidth=1.5))
+    eval_box = FancyBboxPatch((0.25, 0.25), 11.5, 2.0, boxstyle="round,pad=0.02,rounding_size=0.08",
+                              facecolor="#ffffff", edgecolor="#9db0c0", linewidth=1.3)
+    ax.add_patch(eval_box)
+    ax.text(0.45, 1.95, "5  Shared evaluation", fontsize=11, fontweight="bold", color="#132b3e")
+    for i, (title, note) in enumerate([
+        ("Discrimination", "Average precision + prevalence"),
+        ("Calibration", "Brier score"),
+        ("Incremental value", "Firm-clustered bootstrap"),
+        ("Robustness", "Cutoffs and ablation"),
+    ]):
+        x = 0.5 + i * 2.85
+        inner = FancyBboxPatch((x, 0.45), 2.6, 1.15, boxstyle="round,pad=0.02,rounding_size=0.06",
+                               facecolor="#f5f8fb", edgecolor="#c3d0dc", linewidth=1.0)
+        ax.add_patch(inner)
+        ax.text(x + 1.3, 1.2, title, ha="center", fontsize=10, fontweight="bold", color="#132b3e")
+        ax.text(x + 1.3, 0.85, note, ha="center", fontsize=8.6, color="#526a7e")
+    fig.tight_layout()
+    fig.savefig(figdir / "figure1_architecture.pdf", bbox_inches="tight")
+    fig.savefig(figdir / "figure1_architecture.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+    fig, ax = plt.subplots(figsize=(11.2, 5.4))
+    ax.set_xlim(0, 12)
+    ax.set_ylim(0, 6)
+    ax.axis("off")
+    ax.text(0.2, 5.7, "Leakage-aware temporal evaluation protocol",
+            fontsize=13, fontweight="bold", color="#132b3e")
+    ax.text(0.2, 5.32, "Predict from information available at time t; score outcomes only after the cutoff and embargo.",
+            fontsize=9.2, color="#41566a")
+    ax.annotate("", xy=(11.6, 4.55), xytext=(0.4, 4.55),
+                arrowprops=dict(arrowstyle="-|>", color="#49627a", lw=1.8))
+    periods = [
+        (0.4, 3.2, "#dceafe", "#315d91", "Burn-in (3 years)", "Freeze candidate CPC universe"),
+        (3.7, 3.6, "#cfe4d8", "#28734d", "Training years", "Labels end before embargo"),
+        (7.4, 1.7, "#fff0d4", "#a56a12", "Embargo", "One unused year"),
+        (9.2, 2.4, "#d9f4e5", "#28734d", "Future test", "Last two prediction years"),
+    ]
+    for x, w, face, edge, title, note in periods:
+        patch = FancyBboxPatch((x, 3.85), w, 1.15, boxstyle="round,pad=0.02,rounding_size=0.06",
+                               facecolor=face, edgecolor=edge, linewidth=1.3)
+        ax.add_patch(patch)
+        ax.text(x + w / 2, 4.6, title, ha="center", fontsize=10, fontweight="bold", color="#132b3e")
+        ax.text(x + w / 2, 4.2, note, ha="center", fontsize=8.4, color="#31495e")
+    steps = [
+        (0.4, "A. Fit", ["Imputation and scaling", "Model parameters", "Historical graph rates"]),
+        (4.2, "B. Compare", ["M1 logistic baseline", "M2 tabular random forest", "M3 graph-feature RF"]),
+        (8.0, "C. Report", ["Average precision, ROC-AUC", "Balanced accuracy, Brier", "Firm-clustered intervals"]),
+    ]
+    for x, title, lines in steps:
+        patch = FancyBboxPatch((x, 0.45), 3.5, 2.7, boxstyle="round,pad=0.02,rounding_size=0.08",
+                               facecolor="#ffffff", edgecolor="#9db0c0", linewidth=1.3)
+        ax.add_patch(patch)
+        ax.text(x + 0.18, 2.8, title, fontsize=11, fontweight="bold", color="#132b3e")
+        for i, line in enumerate(lines):
+            ax.text(x + 0.18, 2.3 - 0.45 * i, line, fontsize=9.4, color="#31495e")
+    ax.text(0.4, 0.15, "This diagram defines the protocol; it is not a report of measured model performance.",
+            fontsize=8.5, color="#526a7e")
+    fig.tight_layout()
+    fig.savefig(figdir / "figure2_evaluation.pdf", bbox_inches="tight")
+    fig.savefig(figdir / "figure2_evaluation.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     src = ap.add_mutually_exclusive_group(required=True)
     src.add_argument("--data", type=Path, help="normalized CSV: firm_id,year,cpc_code")
     src.add_argument("--demo", action="store_true", help="synthetic smoke test only")
+    src.add_argument("--figures", action="store_true", help="write protocol figures only; no model scores")
     ap.add_argument("--outdir", type=Path, default=Path("outputs"))
+    ap.add_argument("--figdir", type=Path, default=Path("figures"))
     ap.add_argument("--max-technologies", type=int, default=30)
     ap.add_argument("--bootstrap", type=int, default=1000)
     args = ap.parse_args()
+    if args.figures:
+        write_protocol_figures(args.figdir)
+        print(f"Protocol figures written to {args.figdir.resolve()}")
+        return
     df = load_records(args.data, args.demo)
     panel, train_years, embargo_years, test_years, tech_universe, burn_years = make_candidate_panel(
         df, max_technologies=args.max_technologies)
