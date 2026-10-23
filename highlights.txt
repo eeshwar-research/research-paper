@@ -1,0 +1,6 @@
+Highlights
+- Temporal firm-technology graph features are tested against tabular baselines.
+- Candidate classes and features are frozen before the future test window.
+- Incremental graph value is measured with firm-clustered bootstrap intervals.
+- The protocol reports average precision with prevalence, not ROC-AUC alone.
+- Relational features are kept only if they add out-of-time predictive value.

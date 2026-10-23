@@ -6,10 +6,11 @@ Compact research repository for a proposed *Knowledge-Based Systems* short commu
 Do time-valid firm–technology graph features improve out-of-time prediction of a firm's entry into a previously unadopted CPC technology subclass, beyond conventional firm and technology activity features?
 
 ## Minimal structure
-- `paper.md` — full working manuscript, research gap, method, exactly two main tables and two main figures.
-- `src/experiment.py` — one-file temporal experiment with baselines, graph features, chronological validation, paired firm-cluster bootstrap, and output generation.
+- `paper.md` — *Knowledge-Based Systems* Short Communication manuscript, numbered citations, two tables, and two figures.
+- `highlights.txt` — 3–5 journal highlights, each within the 85-character limit.
+- `src/experiment.py` — temporal experiment with baselines, graph features, chronological validation, paired firm-cluster bootstrap, and protocol-figure generation.
 - `requirements.txt` — minimal dependencies.
-- `figures/` — two publication-oriented vector diagrams.
+- `figures/` — two publication-oriented architecture and evaluation diagrams.
 
 ## Data
 The proposed source is the public USPTO PatentsView / Open Data Portal. Download the appropriate patent, assignee/organization, and CPC classification tables from the official [PatentsView page](https://www.uspto.gov/ip-policy/economic-research/patentsview), record the exact release and download date, disambiguate firms, and normalize the result to CSV with these columns:
@@ -27,6 +28,11 @@ One row represents a unique firm-year-CPC subclass relation. CPC subclass codes 
 Install dependencies:
 ```bash
 python -m pip install -r requirements.txt
+```
+
+Protocol figures (no model scores):
+```bash
+python src/experiment.py --figures --figdir figures
 ```
 
 Smoke test:
@@ -50,4 +56,4 @@ The pipeline creates `metrics.csv`, `paired_bootstrap.csv`, `run_summary.txt`, a
 - Inspect data timing, firm disambiguation, duplicate relations, CPC code revisions, class prevalence, and year coverage before interpretation.
 
 ## Publication status
-This is a manuscript and experiment scaffold, not a completed empirical paper. Real-data extraction, a full literature search, execution, robustness checks, and evidence-based results are still required. Do not claim model superiority or guaranteed acceptance before those steps are complete.
+The working manuscript is formatted as a *Knowledge-Based Systems* Short Communication with numbered citations, highlights, two tables, and two protocol figures. Real PatentsView extraction and measured results are still required. Do not claim model superiority or submit the empirical article until those steps are complete. Synthetic `--demo` metrics must never appear in the paper.

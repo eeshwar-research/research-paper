@@ -1,1 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620"><defs><style>.h{font:700 28px Arial;fill:#132b3e}.sub{font:18px Arial;fill:#41566a}.lab{font:700 18px Arial;fill:#132b3e}.txt{font:16px Arial;fill:#31495e}.note{font:15px Arial;fill:#526a7e}</style><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#49627a"/></marker></defs><rect width="1400" height="620" fill="#fbfdff"/><text x="55" y="55" class="h">Leakage-aware temporal evaluation protocol</text><text x="55" y="86" class="sub">Predict from information available at time t; score outcomes only after the temporal cutoff and embargo.</text><text x="65" y="140" class="lab">Time axis</text><path d="M90 178 H1300" stroke="#49627a" stroke-width="3" marker-end="url(#arr)"/><g class="note" text-anchor="middle"><text x="200" y="165">Earlier</text><text x="490" y="165">Training period</text><text x="800" y="165">Embargo / label gap</text><text x="1110" y="165">Future holdout</text></g><rect x="90" y="200" width="570" height="95" rx="12" fill="#dceafe" stroke="#315d91" stroke-width="2"/><text x="120" y="235" class="lab">Training rows</text><text x="120" y="263" class="txt">Predictors and labels available before cutoff</text><rect x="685" y="200" width="215" height="95" rx="12" fill="#fff0d4" stroke="#a56a12" stroke-width="2"/><text x="792" y="235" class="lab" text-anchor="middle">Embargo</text><text x="792" y="263" class="note" text-anchor="middle">No overlap</text><rect x="925" y="200" width="375" height="95" rx="12" fill="#d9f4e5" stroke="#28734d" stroke-width="2"/><text x="955" y="235" class="lab">Held-out test rows</text><text x="955" y="263" class="txt">Later outcomes; never fit on these labels</text><path d="M680 188 V310" stroke="#a56a12" stroke-width="3" stroke-dasharray="7 6"/><path d="M920 188 V310" stroke="#28734d" stroke-width="3" stroke-dasharray="7 6"/><rect x="90" y="355" width="365" height="145" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/><text x="115" y="390" class="lab">A. Fit</text><text x="115" y="420" class="txt">Imputation and encoding</text><text x="115" y="446" class="txt">Model parameters</text><text x="115" y="472" class="txt">Historical graph-peer rates</text><rect x="515" y="355" width="365" height="145" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/><text x="540" y="390" class="lab">B. Compare</text><text x="540" y="420" class="txt">Logistic baseline</text><text x="540" y="446" class="txt">Tabular random forest</text><text x="540" y="472" class="txt">Knowledge-feature RF</text><rect x="940" y="355" width="360" height="145" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/><text x="965" y="390" class="lab">C. Report</text><text x="965" y="420" class="txt">ROC-AUC, average precision</text><text x="965" y="446" class="txt">Balanced accuracy, Brier score</text><text x="965" y="472" class="txt">Paired bootstrap intervals</text><path d="M455 427 H507" stroke="#49627a" stroke-width="2.5" marker-end="url(#arr)"/><path d="M880 427 H932" stroke="#49627a" stroke-width="2.5" marker-end="url(#arr)"/><text x="55" y="555" class="note">Before submission: repeat across temporal cutoffs, audit firm-year duplicates, document prevalence and missingness, and inspect subgroup stability.</text><text x="55" y="583" class="note">This diagram defines the protocol; it is not a report of measured model performance.</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620">
+  <defs>
+    <style>
+      .h{font:700 26px Arial,sans-serif;fill:#132b3e}
+      .sub{font:16px Arial,sans-serif;fill:#41566a}
+      .lab{font:700 16px Arial,sans-serif;fill:#132b3e}
+      .txt{font:15px Arial,sans-serif;fill:#31495e}
+      .note{font:14px Arial,sans-serif;fill:#526a7e}
+    </style>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#49627a"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="620" fill="#fbfdff"/>
+  <text x="48" y="48" class="h">Leakage-aware temporal evaluation protocol</text>
+  <text x="48" y="78" class="sub">Predict from information available at time t; score outcomes only after the temporal cutoff and embargo.</text>
+  <path d="M70 168 H1330" stroke="#49627a" stroke-width="3" marker-end="url(#arr)"/>
+  <rect x="70" y="190" width="360" height="100" rx="12" fill="#dceafe" stroke="#315d91" stroke-width="2"/>
+  <text x="250" y="230" text-anchor="middle" class="lab">Burn-in (3 years)</text>
+  <text x="250" y="258" text-anchor="middle" class="txt">Freeze candidate CPC universe</text>
+  <rect x="450" y="190" width="400" height="100" rx="12" fill="#cfe4d8" stroke="#28734d" stroke-width="2"/>
+  <text x="650" y="230" text-anchor="middle" class="lab">Training years</text>
+  <text x="650" y="258" text-anchor="middle" class="txt">Labels end before the embargo</text>
+  <rect x="870" y="190" width="180" height="100" rx="12" fill="#fff0d4" stroke="#a56a12" stroke-width="2"/>
+  <text x="960" y="230" text-anchor="middle" class="lab">Embargo</text>
+  <text x="960" y="258" text-anchor="middle" class="txt">One unused year</text>
+  <rect x="1070" y="190" width="260" height="100" rx="12" fill="#d9f4e5" stroke="#28734d" stroke-width="2"/>
+  <text x="1200" y="230" text-anchor="middle" class="lab">Future test</text>
+  <text x="1200" y="258" text-anchor="middle" class="txt">Last two prediction years</text>
+  <rect x="70" y="340" width="390" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
+  <text x="94" y="378" class="lab">A. Fit</text>
+  <text x="94" y="412" class="txt">Imputation and scaling</text>
+  <text x="94" y="442" class="txt">Model parameters</text>
+  <text x="94" y="472" class="txt">Historical graph rates</text>
+  <rect x="505" y="340" width="390" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
+  <text x="529" y="378" class="lab">B. Compare</text>
+  <text x="529" y="412" class="txt">M1 logistic baseline</text>
+  <text x="529" y="442" class="txt">M2 tabular random forest</text>
+  <text x="529" y="472" class="txt">M3 graph-feature RF</text>
+  <rect x="940" y="340" width="390" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
+  <text x="964" y="378" class="lab">C. Report</text>
+  <text x="964" y="412" class="txt">Average precision, ROC-AUC</text>
+  <text x="964" y="442" class="txt">Balanced accuracy, Brier score</text>
+  <text x="964" y="472" class="txt">Firm-clustered intervals</text>
+  <path d="M460 427 H497" stroke="#49627a" stroke-width="2.4" marker-end="url(#arr)"/>
+  <path d="M895 427 H932" stroke="#49627a" stroke-width="2.4" marker-end="url(#arr)"/>
+  <text x="48" y="560" class="note">Before submission: execute on real PatentsView data, audit firm identity and timing, and report prevalence with every average-precision value.</text>
+  <text x="48" y="588" class="note">This diagram defines the protocol; it is not a report of measured model performance.</text>
+</svg>
