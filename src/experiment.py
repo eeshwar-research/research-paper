@@ -99,14 +99,14 @@ def historical_graph_features(query_rows: pd.DataFrame, history: pd.DataFrame) -
     tech_lists = history["technology_codes"].map(parse_tech)
     expanded = history[["year", "innovation_next_year", "industry"]].copy()
     expanded["techs"] = tech_lists
-    global_rate = float(history["innovation_next_year"].mean()) if len(history) else 0.0
-    tech_rate_cache, industry_rate_cache = {}, []
+    # Neutral prior avoids leaking labels from future rows when no historical peers exist.
+    fallback_prior = 0.5
     tech_rates, industry_rates = [], []
     for _, row in q.iterrows():
         eligible = history[pd.to_numeric(history["year"], errors="coerce") <= float(row["year"]) - 2]
         if eligible.empty:
-            tech_rates.append(global_rate)
-            industry_rates.append(global_rate)
+            tech_rates.append(fallback_prior)
+            industry_rates.append(fallback_prior)
             continue
         label_mean = float(eligible["innovation_next_year"].mean())
         row_techs = set(parse_tech(row["technology_codes"]))
