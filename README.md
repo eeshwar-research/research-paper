@@ -16,7 +16,7 @@ On a PatentsView organization-assignee extract (grant years 2010–2023; 10,878 
 - `data/processed/firm_year_cpc.provenance.json` — source DOI, filters, hashes, counts
 - `data/LITERATURE_SEARCH.md` — Crossref-verified MDPI / IEEE / ScienceDirect references
 - `outputs/` — metrics, bootstrap, run summary, and a 300-dpi comparison chart (not a third manuscript figure)
-- `figures/` — Fig. 1 architecture and Fig. 2 temporal protocol (vector diagrams aligned with the executed split)
+- `figures/` — Fig. 1 architecture, Fig. 2 temporal protocol, and a separate Elsevier graphical abstract (not a third manuscript figure)
 
 ## Data
 Source: USPTO PatentsView granted-patent metadata through 31 December 2024, Zenodo DOI [10.5281/zenodo.15058362](https://doi.org/10.5281/zenodo.15058362), downloaded 23 October 2026. Tables: `g_patent`, `g_assignee_disambiguated`, `g_cpc_current`, joined on `patent_id`.
@@ -51,4 +51,4 @@ python src/experiment.py --data data/processed/firm_year_cpc.csv.gz --outdir out
 - M3 is compared with M2 on identical held-out pairs; the bootstrap resamples firms.
 
 ## Publication status
-The extract, pre-specified split, results, and Crossref-verified Q1 ScienceDirect/IEEE reference list are in `paper.md`. Remaining submission steps, none of which are claimed as complete here: confirm the legal author name, country, and full postal affiliation; convert `paper.md` to Word or LaTeX and re-check the 10-page double-spaced limit in that file; upload `highlights.txt`; complete the Elsevier competing-interest `.docx` form; and deposit the processed extract plus metric files in a DOI data repository (journal research-data Option C). A graphical abstract was not prepared (encouraged, not required).
+The extract, pre-specified split, results, and Crossref-verified Q1 ScienceDirect/IEEE reference list are in `paper.md`. Remaining submission steps, none of which are claimed as complete here: confirm the legal author name, country, and full postal affiliation; convert `paper.md` to Word or LaTeX and re-check the 10-page double-spaced limit in that file; upload `highlights.txt`; upload `figures/graphical_abstract.pdf` as the Graphical Abstract file (not as Fig. 3); complete the Elsevier competing-interest `.docx` form; and deposit the processed extract plus metric files in a DOI data repository (journal research-data Option C).

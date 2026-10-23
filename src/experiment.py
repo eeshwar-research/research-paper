@@ -202,15 +202,18 @@ def paired_bootstrap(y, p_new, p_base, groups, n_boot=1000, seed=SEED):
 
 
 def write_protocol_figures(figdir: Path):
-    """Export manuscript Fig. 1–2. Does not invent model scores.
+    """Export Fig. 1–2 and the graphical abstract. Does not invent model scores.
 
-    SVG files in figdir are the source of truth for the Markdown manuscript.
-    When cairosvg is available, PDF/PNG are rendered from those SVGs so artwork
-    cannot drift from the diagrams in paper.md. Otherwise a matplotlib fallback
-    draws the same protocol labels.
+    SVG files in figdir are the source of truth. When cairosvg is available,
+    PDF/PNG are rendered from those SVGs. The matplotlib fallback covers only
+    Fig. 1–2; the graphical abstract must keep its Elsevier 1328 x 531 SVG.
     """
     figdir.mkdir(parents=True, exist_ok=True)
-    svg_names = ("figure1_architecture.svg", "figure2_evaluation.svg")
+    svg_names = (
+        "figure1_architecture.svg",
+        "figure2_evaluation.svg",
+        "graphical_abstract.svg",
+    )
     svg_paths = [figdir / name for name in svg_names]
     if all(path.exists() for path in svg_paths):
         try:

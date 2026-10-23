@@ -93,7 +93,7 @@ This research did not receive any specific grant from funding agencies in the pu
 PatentsView metadata: Zenodo DOI 10.5281/zenodo.15058362 [24]. Processed extract, code, and reported outputs: https://github.com/eeshwar-research/research-paper. A DOI deposit of the processed table and metrics is still required for the journal's research-data Option C.
 
 ## Declaration of generative AI and AI-assisted technologies in the manuscript preparation process
-During the preparation of this work the author used Cursor-hosted AI tools for literature metadata checking, language editing, and code documentation. After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article.
+During the preparation of this work the author used Cursor-hosted AI tools for literature metadata checking, language editing, code documentation, and graphical-abstract artwork. After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article.
 
 ## Acknowledgements
 Thanks to the USPTO PatentsView programme for disambiguated patent metadata.
