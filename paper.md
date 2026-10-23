@@ -7,7 +7,8 @@ Independent Researcher
 Corresponding author: eeshwar.business@gmail.com
 
 **Target journal:** *Knowledge-Based Systems* (ISSN 0950-7051)  
-**Article type:** Short communication (≤ 10 double-spaced pages, including tables and figures)
+**Article type:** Short communication (≤ 10 double-spaced pages, including tables and figures)  
+**LaTeX source:** `paper.tex` (Elsevier `elsarticle`; compile with `pdflatex paper.tex`)
 
 ## Abstract
 Firms that pursue digital innovation must decide which technology domains to explore beyond their current patent portfolios. Graph-based opportunity discovery can look effective when future firm–technology relations leak into features, candidate sets, or random splits. This short communication tests whether temporally valid, inspectable knowledge-graph features improve out-of-time prediction of a firm's first entry into a previously unadopted Cooperative Patent Classification (CPC) subclass. A firm–technology graph is built from public USPTO PatentsView records. Conventional firm and class activity features are compared with the same features plus common-neighbour, co-occurrence, and historical peer-adoption signals. Logistic regression and random forests are trained on identical candidates under chronological evaluation with an embargo year, imbalance-aware metrics, and a firm-clustered bootstrap. On 10,878 organization assignees (grant years 2010–2023), the graph-feature forest improved average precision versus the same-learner forest on 2021–2022 pairs (paired 95% interval 0.015 to 0.019). Absolute average precision remained low against a 1.11% positive rate, and logistic regression was a competitive ranking baseline. Relational features therefore add incremental signal, but they do not make technology-entry prediction easy or automatically decision-ready.

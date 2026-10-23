@@ -6,3 +6,10 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .ipynb_checkpoints/
+# LaTeX build artifacts (keep figures/*.pdf; those are manuscript artwork)
+/*.aux
+/*.log
+/*.out
+/*.spl
+/paper.pdf
+*.synctex.gz

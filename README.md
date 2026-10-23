@@ -9,7 +9,9 @@ Do time-valid firm–technology graph features improve out-of-time prediction of
 On a PatentsView organization-assignee extract (grant years 2010–2023; 10,878 firms), the graph-feature random forest improved average precision versus the same-learner forest on 2021–2022 pairs (ΔAP 0.017; firm-cluster 95% interval 0.015–0.019). Logistic regression was a competitive ranking baseline. Absolute AP stayed low against a 1.11% positive rate. See `paper.md` and `outputs/`.
 
 ## Structure
-- `paper.md` — *Knowledge-Based Systems* short-communication manuscript (two tables, two figures, numbered citations)
+- `paper.tex` — Elsevier `elsarticle` source for *Knowledge-Based Systems* (compile with `pdflatex paper.tex`)
+- `paper.md` — same short-communication manuscript in Markdown
+- `figures/figure1_architecture.pdf`, `figures/figure2_evaluation.pdf` — PDF copies of the two manuscript figures
 - `src/prepare_patentsview.py` — download, join, and normalize PatentsView tables
 - `src/experiment.py` — temporal experiment, baselines, graph features, firm-cluster bootstrap
 - `data/processed/firm_year_cpc.csv.gz` — normalized `firm_id,year,cpc_code` extract
@@ -50,5 +52,12 @@ python src/experiment.py --data data/processed/firm_year_cpc.csv.gz --outdir out
 - Thresholds are chosen on a training-period validation year.
 - M3 is compared with M2 on identical held-out pairs; the bootstrap resamples firms.
 
+## Compile the manuscript
+```bash
+pdflatex paper.tex
+pdflatex paper.tex
+```
+KBS accepts `.tex` as the submission source. Submit `paper.tex` plus `figures/figure1_architecture.pdf` and `figures/figure2_evaluation.pdf`. Highlights must still be uploaded as a separate editable file.
+
 ## Publication status
-The extract, pre-specified split, results, and Crossref-verified reference list are in `paper.md`. Remaining submission steps: confirm the legal author name and affiliation, convert `paper.md` to Word or LaTeX (KBS does not accept PDF source), upload highlights as a separate file, complete the Elsevier competing-interest form, and optionally run a second chronological cutoff (H3) and a Scopus/Web of Science search.
+The extract, pre-specified split, results, and Crossref-verified reference list are in `paper.tex` and `paper.md`. Remaining submission steps: confirm the legal author name and affiliation, upload highlights as a separate file, complete the Elsevier competing-interest form, and optionally run a second chronological cutoff (H3) and a Scopus/Web of Science search.
