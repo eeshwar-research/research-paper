@@ -1,49 +1,71 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620">
   <defs>
     <style>
-      .h{font:700 26px Arial,sans-serif;fill:#132b3e}
-      .sub{font:16px Arial,sans-serif;fill:#41566a}
-      .lab{font:700 16px Arial,sans-serif;fill:#132b3e}
-      .txt{font:15px Arial,sans-serif;fill:#31495e}
-      .note{font:14px Arial,sans-serif;fill:#526a7e}
+      .sub{font:18px Arial;fill:#41566a}
+      .lab{font:700 17px Arial;fill:#132b3e}
+      .txt{font:15px Arial;fill:#31495e}
+      .note{font:14px Arial;fill:#526a7e}
     </style>
-    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L9,3 z" fill="#49627a"/>
-    </marker>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#49627a"/></marker>
   </defs>
   <rect width="1400" height="620" fill="#fbfdff"/>
-  <text x="48" y="48" class="h">Leakage-aware temporal evaluation protocol</text>
-  <text x="48" y="78" class="sub">Predict from information available at time t; score outcomes only after the temporal cutoff and embargo.</text>
-  <path d="M70 168 H1330" stroke="#49627a" stroke-width="3" marker-end="url(#arr)"/>
-  <rect x="70" y="190" width="360" height="100" rx="12" fill="#dceafe" stroke="#315d91" stroke-width="2"/>
-  <text x="250" y="230" text-anchor="middle" class="lab">Burn-in (3 years)</text>
-  <text x="250" y="258" text-anchor="middle" class="txt">Freeze candidate CPC universe</text>
-  <rect x="450" y="190" width="400" height="100" rx="12" fill="#cfe4d8" stroke="#28734d" stroke-width="2"/>
-  <text x="650" y="230" text-anchor="middle" class="lab">Training years</text>
-  <text x="650" y="258" text-anchor="middle" class="txt">Labels end before the embargo</text>
-  <rect x="870" y="190" width="180" height="100" rx="12" fill="#fff0d4" stroke="#a56a12" stroke-width="2"/>
-  <text x="960" y="230" text-anchor="middle" class="lab">Embargo</text>
-  <text x="960" y="258" text-anchor="middle" class="txt">One unused year</text>
-  <rect x="1070" y="190" width="260" height="100" rx="12" fill="#d9f4e5" stroke="#28734d" stroke-width="2"/>
-  <text x="1200" y="230" text-anchor="middle" class="lab">Future test</text>
-  <text x="1200" y="258" text-anchor="middle" class="txt">Last two prediction years</text>
-  <rect x="70" y="340" width="390" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
-  <text x="94" y="378" class="lab">A. Fit</text>
-  <text x="94" y="412" class="txt">Imputation and scaling</text>
-  <text x="94" y="442" class="txt">Model parameters</text>
-  <text x="94" y="472" class="txt">Historical graph rates</text>
-  <rect x="505" y="340" width="390" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
-  <text x="529" y="378" class="lab">B. Compare</text>
-  <text x="529" y="412" class="txt">M1 logistic baseline</text>
-  <text x="529" y="442" class="txt">M2 tabular random forest</text>
-  <text x="529" y="472" class="txt">M3 graph-feature RF</text>
-  <rect x="940" y="340" width="390" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
-  <text x="964" y="378" class="lab">C. Report</text>
-  <text x="964" y="412" class="txt">Average precision, ROC-AUC</text>
-  <text x="964" y="442" class="txt">Balanced accuracy, Brier score</text>
-  <text x="964" y="472" class="txt">Firm-clustered intervals</text>
-  <path d="M460 427 H497" stroke="#49627a" stroke-width="2.4" marker-end="url(#arr)"/>
-  <path d="M895 427 H932" stroke="#49627a" stroke-width="2.4" marker-end="url(#arr)"/>
-  <text x="48" y="560" class="note">Before submission: execute on real PatentsView data, audit firm identity and timing, and report prevalence with every average-precision value.</text>
-  <text x="48" y="588" class="note">This diagram defines the protocol; it is not a report of measured model performance.</text>
+  <text x="50" y="42" class="sub">Chronological protocol used in the PatentsView run: predict at t from data ≤ t; score first entry in t+1</text>
+
+  <text x="60" y="92" class="lab">Calendar time (grant years)</text>
+  <path d="M80 168 H1320" stroke="#49627a" stroke-width="3" marker-end="url(#arr)"/>
+
+  <g class="note" text-anchor="middle">
+    <text x="230" y="128">Burn-in</text>
+    <text x="560" y="128">Training prediction years</text>
+    <text x="860" y="128">Embargo</text>
+    <text x="1120" y="128">Future holdout</text>
+  </g>
+
+  <rect x="80" y="186" width="250" height="110" rx="12" fill="#e8eef6" stroke="#315d91" stroke-width="2"/>
+  <text x="205" y="228" text-anchor="middle" class="lab">2010–2012</text>
+  <text x="205" y="258" text-anchor="middle" class="txt">Fix 30 CPC candidates</text>
+  <text x="205" y="280" text-anchor="middle" class="note">Not selected from the test window</text>
+
+  <rect x="350" y="186" width="420" height="110" rx="12" fill="#dceafe" stroke="#315d91" stroke-width="2"/>
+  <text x="560" y="228" text-anchor="middle" class="lab">2013–2019</text>
+  <text x="560" y="258" text-anchor="middle" class="txt">1,540,698 firm–class pairs</text>
+  <text x="560" y="280" text-anchor="middle" class="note">2019 used only for thresholds</text>
+
+  <rect x="790" y="186" width="160" height="110" rx="12" fill="#fff0d4" stroke="#a56a12" stroke-width="2"/>
+  <text x="870" y="228" text-anchor="middle" class="lab">2020</text>
+  <text x="870" y="258" text-anchor="middle" class="txt">Held out</text>
+  <text x="870" y="280" text-anchor="middle" class="note">No overlap</text>
+
+  <rect x="970" y="186" width="340" height="110" rx="12" fill="#d9f4e5" stroke="#28734d" stroke-width="2"/>
+  <text x="1140" y="228" text-anchor="middle" class="lab">2021–2022</text>
+  <text x="1140" y="258" text-anchor="middle" class="txt">455,458 pairs; 10,411 firms</text>
+  <text x="1140" y="280" text-anchor="middle" class="note">Labels unused in fitting</text>
+
+  <path d="M330 176 V310" stroke="#315d91" stroke-width="2" stroke-dasharray="7 6"/>
+  <path d="M770 176 V310" stroke="#a56a12" stroke-width="2" stroke-dasharray="7 6"/>
+  <path d="M950 176 V310" stroke="#28734d" stroke-width="2" stroke-dasharray="7 6"/>
+
+  <rect x="80" y="340" width="400" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
+  <text x="104" y="378" class="lab">A. Feature clock</text>
+  <text x="104" y="412" class="txt">History for firm f at year t uses</text>
+  <text x="104" y="438" class="txt">only patents granted in years ≤ t.</text>
+  <text x="104" y="464" class="txt">Target = first appearance of class c</text>
+  <text x="104" y="490" class="txt">in year t+1, among non-held classes.</text>
+
+  <rect x="500" y="340" width="400" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
+  <text x="524" y="378" class="lab">B. Models compared</text>
+  <text x="524" y="412" class="txt">M1 logistic: activity features only</text>
+  <text x="524" y="438" class="txt">M2 random forest: same features</text>
+  <text x="524" y="464" class="txt">M3 random forest: activity + graph</text>
+  <text x="524" y="490" class="txt">Identical candidates and split</text>
+
+  <rect x="920" y="340" width="400" height="175" rx="14" fill="#fff" stroke="#9db0c0" stroke-width="2"/>
+  <text x="944" y="378" class="lab">C. What is reported</text>
+  <text x="944" y="412" class="txt">Average precision vs 1.11% base rate</text>
+  <text x="944" y="438" class="txt">ROC-AUC; balanced accuracy; Brier</text>
+  <text x="944" y="464" class="txt">Firm-cluster 95% interval for M3−M2</text>
+  <text x="944" y="490" class="txt">No demo-mode numbers are used</text>
+
+  <text x="50" y="560" class="note">This figure documents the executed protocol. It is not a performance chart. Measured scores are in Table 2.</text>
+  <text x="50" y="586" class="note">A second chronological cutoff was not run; hypothesis H3 therefore remains untested.</text>
 </svg>

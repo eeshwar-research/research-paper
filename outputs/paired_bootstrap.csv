@@ -1,0 +1,2 @@
+comparison,primary_metric,delta_ap,ci_low,ci_high,bootstrap_replicates_requested,note
+M3 minus M2,average_precision,0.017217133606754583,0.015462982110673758,0.01907017725600293,1000,Paired cluster bootstrap resamples firms and retains all held-out pairs.

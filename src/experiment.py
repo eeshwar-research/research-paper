@@ -92,6 +92,7 @@ def make_candidate_panel(df, max_technologies=30, min_firms=3):
     firms = sorted(df.firm_id.unique().tolist())
     rows = []
     for pred_year in eligible_prediction_years:
+        print(f"Building candidate panel for prediction year {pred_year}", flush=True)
         history = df[df.year <= pred_year]
         hist_portfolios = history.groupby("firm_id").cpc_code.apply(set).to_dict()
         if not hist_portfolios:
@@ -131,7 +132,8 @@ def make_candidate_panel(df, max_technologies=30, min_firms=3):
                 new_next = candidate in next_tech.get(firm, set())
                 neighbors = tech_neighbors.get(candidate, set())
                 common = sum(pair_counts.get((candidate, tech), 0) for tech in portfolio if tech != candidate)
-                peer_prev = sum(candidate in hist_portfolios[p] for p in peer_firms) / peer_den if peer_firms else 0.0
+                cand_firms = tech_to_firms.get(candidate, set())
+                peer_prev = (len(peer_firms & cand_firms) / peer_den) if peer_firms else 0.0
                 recent_count = recent.get(candidate, 0)
                 prior_count = prior.get(candidate, 0)
                 growth = (recent_count - prior_count) / max(1, prior_count)
