@@ -23,7 +23,7 @@ from sklearn.metrics import average_precision_score, roc_auc_score, balanced_acc
 from sklearn.model_selection import train_test_split
 
 SEED = 41
-BASE = ["firm_portfolio_size", "firm_patent_count", "candidate_prevalence", "candidate_recent_growth"]
+BASE = ["firm_portfolio_size", "firm_activity_count", "candidate_prevalence", "candidate_recent_growth"]
 GRAPH = ["common_neighbor_count", "peer_candidate_prevalence", "candidate_graph_degree"]
 REQUIRED = {"firm_id", "year", "cpc_code"}
 
@@ -31,7 +31,7 @@ REQUIRED = {"firm_id", "year", "cpc_code"}
 def make_demo(seed=SEED, n_firms=100, years=range(2010, 2024), n_tech=18):
     """Synthetic patent-like records for smoke testing only."""
     rng = np.random.default_rng(seed)
-    techs = [f"{chr(65+i//10)}{i%10:02d}" for i in range(n_tech)]
+    techs = [f"{chr(65+i//10)}{i:03d}" for i in range(n_tech)]
     rows = []
     firm_base = [set(rng.choice(techs, size=int(rng.integers(2, 6)), replace=False)) for _ in range(n_firms)]
     for fi, base in enumerate(firm_base):
@@ -121,7 +121,7 @@ def make_candidate_panel(df, max_technologies=30, min_firms=3):
         for firm, portfolio in hist_portfolios.items():
             if len(portfolio) == 0:
                 continue
-            patent_count = int(patent_counts.get(firm, 0))
+            activity_count = int(patent_counts.get(firm, 0))
             # Inverted index avoids an O(number_of_firms^2) peer scan.
             peer_firms = set().union(*(tech_to_firms.get(tech, set()) for tech in portfolio)) - {firm}
             peer_den = max(1, len(peer_firms))
@@ -139,7 +139,7 @@ def make_candidate_panel(df, max_technologies=30, min_firms=3):
                     "firm_id": firm, "prediction_year": int(pred_year), "candidate": candidate,
                     "target": int(new_next),
                     "firm_portfolio_size": len(portfolio),
-                    "firm_patent_count": patent_count,
+                    "firm_activity_count": activity_count,
                     "candidate_prevalence": prev_counts.get(candidate, 0) / total_firms,
                     "candidate_recent_growth": float(np.clip(growth, -5, 5)),
                     "common_neighbor_count": float(common),
