@@ -1,8 +1,9 @@
-"""Reproducible prototype for knowledge-enhanced innovation prediction.
+"""Temporal experiment for knowledge-graph-enhanced innovation prediction.
 
-Demo mode generates synthetic data only for pipeline smoke-testing. Do not
-report synthetic-demo metrics as scientific findings. The knowledge features
-in this starter are proxies, not outputs from a real knowledge graph.
+--demo is synthetic and intended only for pipeline smoke-testing.
+Never report demo metrics as empirical findings. Graph features are derived
+from firm-technology relations and lagged peer labels; verify timing and data
+provenance carefully before using real data.
 """
 from __future__ import annotations
 import argparse
@@ -14,183 +15,263 @@ import matplotlib.pyplot as plt
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     roc_auc_score, average_precision_score, balanced_accuracy_score,
-    brier_score_loss, confusion_matrix
+    brier_score_loss
 )
-from sklearn.model_selection import train_test_split
 
-REQUIRED = {
-    "firm_id", "year", "digital_intensity", "data_analytics",
-    "patent_count", "rd_intensity", "market_growth", "innovation_next_year"
-}
-BASE_FEATURES = ["digital_intensity", "data_analytics", "patent_count",
-                 "rd_intensity", "market_growth"]
-KNOWLEDGE_FEATURES = ["technology_diversity", "industry_signal"]
+SEED = 41
+BASE_NUMERIC = ["digital_intensity", "data_analytics", "patent_count",
+                "rd_intensity", "market_growth"]
+CATEGORICAL = ["industry"]
+GRAPH_FEATURES = ["technology_diversity", "technology_peer_prior",
+                  "industry_peer_prior"]
+REQUIRED = set(["firm_id", "year", *BASE_NUMERIC, *CATEGORICAL,
+                "technology_codes", "innovation_next_year"])
 
 
-def make_demo(seed: int = 17, n_firms: int = 500,
-              years=range(2018, 2025)) -> pd.DataFrame:
-    """Create synthetic panel data for smoke-testing only."""
+def make_demo(seed: int = SEED, n_firms: int = 420,
+              years=range(2017, 2025)) -> pd.DataFrame:
+    """Generate synthetic firm-year data solely to smoke-test the pipeline."""
     rng = np.random.default_rng(seed)
-    rows = []
-    firm_effect = rng.normal(0, 0.8, n_firms)
+    industries = ["software", "manufacturing", "health", "retail", "finance"]
+    tech_pool = [f"T{i:02d}" for i in range(18)]
+    firm_profiles = []
     for i in range(n_firms):
-        industry_signal = rng.normal()
+        industry = industries[i % len(industries)]
+        ntech = int(rng.integers(1, 5))
+        techs = rng.choice(tech_pool, size=ntech, replace=False).tolist()
+        firm_profiles.append((industry, techs, rng.normal(0, .5)))
+    rows = []
+    for i, (industry, techs, firm_effect) in enumerate(firm_profiles):
         for year in years:
-            digital = np.clip(rng.beta(2, 2), 0, 1)
-            analytics = np.clip(0.55 * digital + rng.normal(0.25, 0.2), 0, 1)
-            patents = rng.poisson(0.8 + digital)
-            rd = np.clip(rng.gamma(2, 0.08), 0, 1)
-            market = rng.normal(0.02, 0.06)
-            diversity = np.clip(0.25 + 0.5 * digital + rng.normal(0, 0.2), 0, 1)
-            logit = (-2.2 + digital + 0.8 * analytics + 0.5 * rd
-                     + 0.25 * patents + 0.3 * diversity
-                     + 0.2 * industry_signal + firm_effect[i] * 0.25)
+            digital = float(rng.beta(2, 2))
+            analytics = float(np.clip(.55 * digital + rng.normal(.22, .18), 0, 1))
+            patents = int(rng.poisson(.6 + digital))
+            rd = float(np.clip(rng.gamma(2, .08), 0, 1))
+            market = float(rng.normal(.025, .055))
+            tech_signal = np.mean([int(t[1:]) % 5 for t in techs]) / 5
+            logit = -2.3 + .8 * digital + .6 * analytics + .45 * rd + .16 * patents + .35 * tech_signal + firm_effect
             p = 1 / (1 + np.exp(-logit))
             y = int(rng.random() < p)
             rows.append([f"F{i:04d}", year, digital, analytics, patents, rd,
-                         market, diversity, industry_signal, y])
+                         market, industry, ";".join(techs), y])
     return pd.DataFrame(rows, columns=[
-        "firm_id", "year", "digital_intensity", "data_analytics",
-        "patent_count", "rd_intensity", "market_growth",
-        "technology_diversity", "industry_signal", "innovation_next_year"
+        "firm_id", "year", *BASE_NUMERIC, *CATEGORICAL,
+        "technology_codes", "innovation_next_year"
     ])
 
 
-def add_knowledge_proxy_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Create explicitly labelled proxies until genuine graph data are available."""
-    out = df.copy()
-    if "technology_diversity" not in out:
-        out["technology_diversity"] = (
-            out["digital_intensity"].fillna(0)
-            * (1 + np.log1p(out["patent_count"].fillna(0)))
-        )
-    if "industry_signal" not in out:
-        out["industry_signal"] = out.groupby("year")["market_growth"].transform(
-            lambda s: (s - s.mean()) / (s.std() + 1e-8)
-        )
-    return out
+def parse_tech(value) -> list[str]:
+    if pd.isna(value) or not str(value).strip():
+        return []
+    return sorted({x.strip() for x in str(value).split(";") if x.strip()})
+
+
+def temporal_split(df: pd.DataFrame):
+    """Hold out the latest years with a one-year embargo for next-year labels."""
+    years = sorted(pd.to_numeric(df["year"], errors="coerce").dropna().unique())
+    if len(years) < 5:
+        raise ValueError("At least five distinct years are required for a temporal split.")
+    test_start = years[-2]
+    train_end = years[-4]
+    train = df[df["year"] <= train_end].copy()
+    test = df[df["year"] >= test_start].copy()
+    if train.empty or test.empty:
+        raise ValueError("Temporal split produced an empty train/test partition.")
+    if train["innovation_next_year"].nunique() != 2 or test["innovation_next_year"].nunique() != 2:
+        raise ValueError("Both train and test must contain both classes; revise dataset or time window.")
+    return train, test, f"train year <= {train_end}; test year >= {test_start}; embargo year(s) between"
+
+
+def historical_graph_features(query_rows: pd.DataFrame, history: pd.DataFrame) -> pd.DataFrame:
+    """Build relational features using only labels available at least one year earlier.
+
+    A source row at year t has an outcome in t+1; for a query row at year y,
+    only source rows with year <= y-2 are eligible. This avoids using a peer's
+    next-year label before it would have been observable.
+    """
+    q = query_rows.copy()
+    q["technology_diversity"] = q["technology_codes"].map(lambda x: len(parse_tech(x))).astype(float)
+    tech_lists = history["technology_codes"].map(parse_tech)
+    expanded = history[["year", "innovation_next_year", "industry"]].copy()
+    expanded["techs"] = tech_lists
+    global_rate = float(history["innovation_next_year"].mean()) if len(history) else 0.0
+    tech_rate_cache, industry_rate_cache = {}, []
+    tech_rates, industry_rates = [], []
+    for _, row in q.iterrows():
+        eligible = history[pd.to_numeric(history["year"], errors="coerce") <= float(row["year"]) - 2]
+        if eligible.empty:
+            tech_rates.append(global_rate)
+            industry_rates.append(global_rate)
+            continue
+        label_mean = float(eligible["innovation_next_year"].mean())
+        row_techs = set(parse_tech(row["technology_codes"]))
+        eligible_techs = eligible["technology_codes"].map(parse_tech)
+        matched = eligible.loc[eligible_techs.map(lambda ts: bool(row_techs.intersection(ts)))]
+        tech_rates.append(float(matched["innovation_next_year"].mean()) if len(matched) else label_mean)
+        ind = eligible[eligible["industry"].astype(str) == str(row["industry"])]
+        industry_rates.append(float(ind["innovation_next_year"].mean()) if len(ind) else label_mean)
+    q["technology_peer_prior"] = tech_rates
+    q["industry_peer_prior"] = industry_rates
+    return q
 
 
 def build_model(kind: str, features: list[str]) -> Pipeline:
-    numeric = Pipeline([
-        ("imputer", SimpleImputer(strategy="median")),
-        ("scaler", StandardScaler())
-    ])
-    prep = ColumnTransformer([("numeric", numeric, features)], remainder="drop")
+    numeric = [f for f in features if f not in CATEGORICAL]
+    categorical = [f for f in features if f in CATEGORICAL]
+    transformers = []
+    if numeric:
+        transformers.append(("num", Pipeline([
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scale", StandardScaler())
+        ]), numeric))
+    if categorical:
+        transformers.append(("cat", Pipeline([
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("onehot", OneHotEncoder(handle_unknown="ignore"))
+        ]), categorical))
+    prep = ColumnTransformer(transformers)
     if kind == "logistic":
-        clf = LogisticRegression(max_iter=2000, class_weight="balanced",
-                                 random_state=17)
+        clf = LogisticRegression(max_iter=2500, class_weight="balanced", random_state=SEED)
     else:
         clf = RandomForestClassifier(
-            n_estimators=400, min_samples_leaf=4, class_weight="balanced",
-            random_state=17, n_jobs=-1
+            n_estimators=350, min_samples_leaf=5, max_features="sqrt",
+            class_weight="balanced_subsample", random_state=SEED, n_jobs=-1
         )
     return Pipeline([("prep", prep), ("model", clf)])
 
 
-def temporal_split(df: pd.DataFrame):
-    years = sorted(df["year"].dropna().unique())
-    if len(years) >= 3:
-        cutoff = years[max(0, int(len(years) * 0.75) - 1)]
-        train = df[df.year <= cutoff]
-        test = df[df.year > cutoff]
-        if (not train.empty and not test.empty
-                and test["innovation_next_year"].nunique() == 2):
-            return train, test, f"temporal holdout (train <= {cutoff})"
-    train, test = train_test_split(
-        df, test_size=0.25, random_state=17,
-        stratify=df["innovation_next_year"]
-    )
-    return train, test, "random stratified fallback (use cautiously; panel leakage risk)"
+def score(y, p, threshold=.5):
+    y = np.asarray(y, dtype=int)
+    pred = (np.asarray(p) >= threshold).astype(int)
+    return {
+        "roc_auc": float(roc_auc_score(y, p)),
+        "average_precision": float(average_precision_score(y, p)),
+        "balanced_accuracy": float(balanced_accuracy_score(y, pred)),
+        "brier_score": float(brier_score_loss(y, p))
+    }
+
+
+def bootstrap_delta(y, p_new, p_base, metric, n_boot=1500, seed=SEED):
+    """Paired row bootstrap CI for M3 minus M2 on the same test cases."""
+    rng = np.random.default_rng(seed)
+    y = np.asarray(y, dtype=int)
+    p_new, p_base = np.asarray(p_new), np.asarray(p_base)
+    values = []
+    n = len(y)
+    fn = {"roc_auc": roc_auc_score, "average_precision": average_precision_score,
+          "brier_score": brier_score_loss}[metric]
+    for _ in range(n_boot):
+        idx = rng.integers(0, n, n)
+        if len(np.unique(y[idx])) < 2:
+            continue
+        if metric == "brier_score":
+            delta = fn(y[idx], p_base[idx]) - fn(y[idx], p_new[idx])
+        else:
+            delta = fn(y[idx], p_new[idx]) - fn(y[idx], p_base[idx])
+        values.append(delta)
+    if not values:
+        return (np.nan, np.nan, np.nan)
+    arr = np.asarray(values)
+    return (float(np.mean(arr)), float(np.quantile(arr, .025)), float(np.quantile(arr, .975)))
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--demo", action="store_true",
-                    help="use synthetic smoke-test data")
-    ap.add_argument("--data", type=Path,
-                    help="CSV containing required real-data columns")
+    ap.add_argument("--demo", action="store_true", help="use synthetic smoke-test data only")
+    ap.add_argument("--data", type=Path, help="CSV path with required columns")
     ap.add_argument("--outdir", type=Path, default=Path("outputs"))
+    ap.add_argument("--bootstrap", type=int, default=1500)
     args = ap.parse_args()
-    if not args.demo and args.data is None:
-        ap.error("Provide --demo or --data path/to/data.csv")
+    if args.demo == (args.data is not None):
+        ap.error("Choose exactly one of --demo or --data path/to/file.csv")
     df = make_demo() if args.demo else pd.read_csv(args.data)
     missing = REQUIRED - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns: {sorted(missing)}")
-    df = add_knowledge_proxy_features(df).sort_values("year")
-    if df["innovation_next_year"].nunique() != 2:
-        raise ValueError("Target must contain both binary classes (0 and 1).")
-    train, test, split_name = temporal_split(df)
-    if train["innovation_next_year"].nunique() < 2:
-        raise ValueError("Training split contains only one target class; revise split/data.")
+    df = df.copy()
+    df["year"] = pd.to_numeric(df["year"], errors="raise")
+    df["innovation_next_year"] = pd.to_numeric(df["innovation_next_year"], errors="raise").astype(int)
+    if not set(df["innovation_next_year"].unique()).issubset({0, 1}):
+        raise ValueError("innovation_next_year must be binary 0/1.")
+    if df.duplicated(["firm_id", "year"]).any():
+        raise ValueError("Duplicate firm_id/year rows detected; resolve before evaluation.")
+    df = df.sort_values(["year", "firm_id"]).reset_index(drop=True)
+    train, test, split_desc = temporal_split(df)
+
+    # Build temporal relational features independently for train and test rows.
+    # Each row only receives peer labels observable before its own prediction year.
+    train_feat = historical_graph_features(train, train)
+    test_feat = historical_graph_features(test, train)
+    base_features = BASE_NUMERIC + CATEGORICAL
+    graph_features = base_features + GRAPH_FEATURES
+    y_train = train_feat["innovation_next_year"].astype(int)
+    y_test = test_feat["innovation_next_year"].astype(int)
+    if y_train.nunique() != 2 or y_test.nunique() != 2:
+        raise ValueError("Temporal train/test must each contain both classes.")
+
     args.outdir.mkdir(parents=True, exist_ok=True)
-
-    experiments = {
-        "M1_logistic": ("logistic", BASE_FEATURES),
-        "M2_random_forest": ("forest", BASE_FEATURES),
-        "M3_knowledge_enhanced": ("forest", BASE_FEATURES + KNOWLEDGE_FEATURES),
+    specs = {
+        "M1_logistic_baseline": ("logistic", base_features),
+        "M2_random_forest": ("forest", base_features),
+        "M3_knowledge_graph_features": ("forest", graph_features)
     }
-    records = []
-    for name, (kind, features) in experiments.items():
+    predictions, rows = {}, []
+    for name, (kind, features) in specs.items():
         model = build_model(kind, features)
-        model.fit(train[features], train["innovation_next_year"])
-        prob = model.predict_proba(test[features])[:, 1]
-        pred = (prob >= 0.5).astype(int)
-        y = test["innovation_next_year"].astype(int)
-        records.append({
-            "model": name, "split": split_name, "n_train": len(train),
-            "n_test": len(test), "prevalence_test": float(y.mean()),
-            "roc_auc": float(roc_auc_score(y, prob)) if y.nunique() == 2 else np.nan,
-            "average_precision": float(average_precision_score(y, prob)),
-            "balanced_accuracy": float(balanced_accuracy_score(y, pred)),
-            "brier_score": float(brier_score_loss(y, prob)),
-            "tn_fp_fn_tp": confusion_matrix(y, pred, labels=[0, 1]).ravel().tolist()
+        model.fit(train_feat[features], y_train)
+        prob = model.predict_proba(test_feat[features])[:, 1]
+        predictions[name] = prob
+        metrics = score(y_test, prob)
+        rows.append({
+            "model": name, "split": split_desc, "n_train": len(train_feat),
+            "n_test": len(test_feat), "test_prevalence": float(y_test.mean()),
+            **metrics
         })
-    results = pd.DataFrame(records)
+    results = pd.DataFrame(rows)
     results.to_csv(args.outdir / "metrics.csv", index=False)
-    print(results.to_string(index=False))
-    print("\nWARNING: synthetic-demo results are for code smoke-testing only."
-          if args.demo else
-          "\nVerify data provenance, leakage controls, and target validity before interpreting results.")
 
-    # Generate a compact architecture figure.
-    fig, ax = plt.subplots(figsize=(10, 3.8))
-    ax.axis("off")
-    boxes = [
-        (0.03, 0.38, 0.19, 0.32, "Time-stamped\nfirm + market data"),
-        (0.28, 0.38, 0.19, 0.32, "Domain knowledge\nentities + relations"),
-        (0.53, 0.38, 0.19, 0.32, "Leakage-safe\nfeature construction"),
-        (0.78, 0.38, 0.19, 0.32, "Baseline vs.\nknowledge-enhanced AI")
-    ]
-    for x, y, w, h, label in boxes:
-        ax.add_patch(plt.Rectangle((x, y), w, h, fill=False, linewidth=1.5))
-        ax.text(x + w / 2, y + h / 2, label, ha="center", va="center", fontsize=10)
-    for x in [0.22, 0.47, 0.72]:
-        ax.annotate("", xy=(x + 0.055, 0.54), xytext=(x, 0.54),
-                    arrowprops=dict(arrowstyle="->", lw=1.4))
-    ax.text(0.5, 0.12, "Output: out-of-time prediction + calibration + decision metrics",
-            ha="center", fontsize=10)
-    fig.tight_layout()
-    fig.savefig(args.outdir / "figure1_architecture.png", dpi=220, bbox_inches="tight")
-    plt.close(fig)
+    delta_rows = []
+    base = predictions["M2_random_forest"]
+    enhanced = predictions["M3_knowledge_graph_features"]
+    for metric in ["roc_auc", "average_precision", "brier_score"]:
+        mean, lo, hi = bootstrap_delta(y_test, enhanced, base, metric, args.bootstrap)
+        delta_rows.append({"comparison": "M3 minus M2 (positive favours M3)",
+                           "metric": metric, "delta_mean": mean,
+                           "ci_2.5%": lo, "ci_97.5%": hi,
+                           "bootstrap_replicates_requested": args.bootstrap})
+    pd.DataFrame(delta_rows).to_csv(args.outdir / "paired_bootstrap.csv", index=False)
 
-    metric = results.set_index("model")[["roc_auc", "average_precision",
-                                         "balanced_accuracy"]]
-    ax = metric.plot(kind="bar", figsize=(9, 4.5), ylim=(0, 1), rot=12)
-    ax.set_ylabel("Score")
-    ax.set_title("Model comparison — synthetic demo only" if args.demo
-                 else "Model comparison on supplied dataset")
-    ax.legend(loc="lower right")
+    # Figure 2 is generated from the actual selected dataset. Demo charts are labelled.
+    metric_cols = ["roc_auc", "average_precision", "balanced_accuracy"]
+    ax = results.set_index("model")[metric_cols].plot(kind="bar", figsize=(9.5, 5.2), ylim=(0, 1), rot=12)
+    ax.set_ylabel("Score (higher is better)")
+    ax.set_title("Synthetic smoke-test — not empirical findings" if args.demo
+                 else "Out-of-time model comparison")
+    ax.grid(axis="y", alpha=.25)
+    ax.legend(loc="lower right", frameon=False)
     plt.tight_layout()
-    plt.savefig(args.outdir / "figure2_model_comparison.png", dpi=220, bbox_inches="tight")
+    plt.savefig(args.outdir / "figure2_model_comparison.png", dpi=300, bbox_inches="tight")
     plt.close()
+
+    # Save an auditable split summary, including the gap.
+    (args.outdir / "run_summary.txt").write_text(
+        f"seed={SEED}\nmode={'synthetic demo' if args.demo else 'user data'}\n"
+        f"split={split_desc}\ntrain_n={len(train_feat)}\ntest_n={len(test_feat)}\n"
+        f"test_prevalence={y_test.mean():.6f}\n"
+        f"warning={'Synthetic metrics are smoke-test only.' if args.demo else 'Verify provenance, outcome timing, and feature availability.'}\n",
+        encoding="utf-8"
+    )
+    print(results.to_string(index=False))
+    print("\nPaired bootstrap M3 vs M2:")
+    print(pd.DataFrame(delta_rows).to_string(index=False))
     print(f"\nOutputs written to {args.outdir.resolve()}")
+    if args.demo:
+        print("WARNING: synthetic demo metrics are not evidence about real firms.")
 
 
 if __name__ == "__main__":
