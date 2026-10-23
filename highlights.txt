@@ -1,6 +1,6 @@
 Highlights
-- Temporal firm-technology graph features are tested against tabular baselines.
-- Candidate classes and features are frozen before the future test window.
-- Incremental graph value is measured with firm-clustered bootstrap intervals.
-- The protocol reports average precision with prevalence, not ROC-AUC alone.
-- Relational features are kept only if they add out-of-time predictive value.
+- Temporally valid graph features are tested for firm technology-entry.
+- A many-firm PatentsView holdout uses an embargoed chronological split.
+- Graph features lift forest AP; logistic regression remains competitive.
+- Absolute AP stays low against a 1.11% positive technology-entry rate.
+- Relational scores are inspectable inputs, not mandates to enter a class.

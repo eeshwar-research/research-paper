@@ -246,7 +246,7 @@ def write_protocol_figures(figdir: Path):
         ("Discrimination", "Average precision + prevalence"),
         ("Calibration", "Brier score"),
         ("Incremental value", "Firm-clustered bootstrap"),
-        ("Robustness", "Cutoffs and ablation"),
+        ("Executed split", "One embargoed holdout"),
     ]):
         x = 0.5 + i * 2.85
         inner = FancyBboxPatch((x, 0.45), 2.6, 1.15, boxstyle="round,pad=0.02,rounding_size=0.06",

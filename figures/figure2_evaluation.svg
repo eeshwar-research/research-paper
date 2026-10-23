@@ -67,5 +67,5 @@
   <text x="944" y="490" class="txt">No demo-mode numbers are used</text>
 
   <text x="50" y="560" class="note">This figure documents the executed protocol. It is not a performance chart. Measured scores are in Table 2.</text>
-  <text x="50" y="586" class="note">A second chronological cutoff was not run; hypothesis H3 therefore remains untested.</text>
+  <text x="50" y="586" class="note">A second chronological cutoff was not run; temporal robustness across windows remains untested.</text>
 </svg>
