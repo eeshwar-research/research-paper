@@ -1,0 +1,8 @@
+data/raw/*.tsv
+data/raw/*.zip
+data/raw/*.part
+data/processed/firm_year_cpc.csv
+__pycache__/
+.pytest_cache/
+*.pyc
+.ipynb_checkpoints/
