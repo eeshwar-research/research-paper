@@ -9,14 +9,14 @@ Do time-valid firm–technology graph features improve out-of-time prediction of
 On a PatentsView organization-assignee extract (grant years 2010–2023; 10,878 firms), the graph-feature random forest improved average precision versus the same-learner forest on 2021–2022 pairs (ΔAP 0.017; firm-cluster 95% interval 0.015–0.019). Logistic regression was a competitive ranking baseline. Absolute AP stayed low against a 1.11% positive rate. See `paper.md` and `outputs/`.
 
 ## Structure
-- `paper.md` — manuscript with measured results, three tables, and three figures
+- `paper.md` — *Knowledge-Based Systems* short-communication manuscript (two tables, two figures, numbered citations)
 - `src/prepare_patentsview.py` — download, join, and normalize PatentsView tables
 - `src/experiment.py` — temporal experiment, baselines, graph features, firm-cluster bootstrap
 - `data/processed/firm_year_cpc.csv.gz` — normalized `firm_id,year,cpc_code` extract
 - `data/processed/firm_year_cpc.provenance.json` — source DOI, filters, hashes, counts
-- `data/LITERATURE_SEARCH.md` — documented reference expansion
-- `outputs/` — metrics, bootstrap, run summary, comparison chart
-- `figures/` — architecture, evaluation protocol, and observed performance plot
+- `data/LITERATURE_SEARCH.md` — Crossref-verified MDPI / IEEE / ScienceDirect references
+- `outputs/` — metrics, bootstrap, run summary, and a 300-dpi comparison chart (not a third manuscript figure)
+- `figures/` — Fig. 1 architecture and Fig. 2 temporal protocol (vector diagrams aligned with the executed split)
 
 ## Data
 Source: USPTO PatentsView granted-patent metadata through 31 December 2024, Zenodo DOI [10.5281/zenodo.15058362](https://doi.org/10.5281/zenodo.15058362), downloaded 23 October 2026. Tables: `g_patent`, `g_assignee_disambiguated`, `g_cpc_current`, joined on `patent_id`.
@@ -51,4 +51,4 @@ python src/experiment.py --data data/processed/firm_year_cpc.csv.gz --outdir out
 - M3 is compared with M2 on identical held-out pairs; the bootstrap resamples firms.
 
 ## Publication status
-The extract, experiment, and results section are completed for the pre-specified split. Remaining work includes a second chronological cutoff, sector slices, and a Scopus/Web of Science search if the journal requires one.
+The extract, pre-specified split, results, and Crossref-verified reference list are in `paper.md`. Remaining submission steps: confirm the legal author name and affiliation, convert `paper.md` to Word or LaTeX (KBS does not accept PDF source), upload highlights as a separate file, complete the Elsevier competing-interest form, and optionally run a second chronological cutoff (H3) and a Scopus/Web of Science search.

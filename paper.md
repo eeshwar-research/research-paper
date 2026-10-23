@@ -1,93 +1,126 @@
 # Temporal Knowledge-Graph Features for Firm-Specific Technology Opportunity Prediction
-## An Explainable Decision-Support Benchmark for Digital Innovation
 
-**Article type:** Short communication — full working manuscript  
-**Target journal:** *Knowledge-Based Systems*  
-**Evidence status:** Real PatentsView extract executed on 23 October 2026. Metrics below come from `outputs/` of this repository. No values are invented.  
-**Reference-paper use:** The author's accepted short communication is used as a structural reference for explicit mechanisms, credible baselines, component ablation, uncertainty reporting, and limitations. Its domain-specific content and results are not reused.
+**Short Communication**
+
+Eeshwar  
+Independent Researcher  
+Corresponding author: eeshwar.business@gmail.com
+
+**Target journal:** *Knowledge-Based Systems* (ISSN 0950-7051)  
+**Article type:** Short communication (≤ 10 double-spaced pages, including tables and figures)
 
 ## Abstract
-Firms pursuing digital innovation must decide which technology domains to explore beyond their existing capabilities. Patent portfolios provide observable traces of technological activity, while relations between firms and technology classes provide a structured basis for knowledge-aware decision support. However, graph-based opportunity discovery is vulnerable to a practical evaluation problem: a model can appear effective when future technology relations leak into features, candidate sets, or random train–test splits. This short communication specifies a temporally constrained benchmark for predicting whether a firm will enter a previously unadopted technology class in the following year. A firm–technology knowledge graph is constructed from public patent records. The proposed model augments firm and technology activity features with graph-derived common-neighbour, technology co-occurrence, and historical peer signals. It is compared with logistic regression and random-forest baselines on identical firm–technology candidates using chronological evaluation, an embargo between training labels and the test period, paired bootstrap intervals, and imbalance-aware metrics. The contribution is deliberately bounded: the study tests whether transparent relational features add out-of-time predictive value, rather than assuming that graph complexity is beneficial. On a PatentsView extract of 10,878 organization assignees (grant years 2010–2023), the graph-feature model improved average precision relative to the same-learner random-forest baseline on held-out 2021–2022 pairs (paired firm-cluster 95% interval 0.015 to 0.019). Absolute average precision remained low against a 1.11% positive rate, and logistic regression was a competitive ranking baseline. Relational features therefore add incremental signal for this task, but they do not make technology-entry prediction easy or automatically decision-ready.
+Firms that pursue digital innovation must decide which technology domains to explore beyond their current patent portfolios. Graph-based opportunity discovery can look effective when future firm–technology relations leak into features, candidate sets, or random splits. This short communication tests whether temporally valid, inspectable knowledge-graph features improve out-of-time prediction of a firm's first entry into a previously unadopted Cooperative Patent Classification (CPC) subclass. A firm–technology graph is built from public USPTO PatentsView records. Conventional firm and class activity features are compared with the same features plus common-neighbour, co-occurrence, and historical peer-adoption signals. Logistic regression and random forests are trained on identical candidates under chronological evaluation with an embargo year, imbalance-aware metrics, and a firm-clustered bootstrap. On 10,878 organization assignees (grant years 2010–2023), the graph-feature forest improved average precision versus the same-learner forest on 2021–2022 pairs (paired 95% interval 0.015 to 0.019). Absolute average precision remained low against a 1.11% positive rate, and logistic regression was a competitive ranking baseline. Relational features therefore add incremental signal, but they do not make technology-entry prediction easy or automatically decision-ready.
 
-**Keywords:** knowledge-based systems; knowledge graph; technology opportunity discovery; firm innovation; patent analytics; temporal validation; explainable AI; digital innovation; decision support.
+**Keywords:** knowledge graph; technology opportunity; patent analytics; temporal validation; decision support; explainable AI; link prediction
+
+## Highlights
+- Temporally valid graph features are tested for firm technology-entry.
+- A many-firm PatentsView holdout uses an embargoed chronological split.
+- Graph features lift forest AP; logistic regression remains competitive.
+- Absolute AP stays low against a 1.11% positive technology-entry rate.
+- Relational scores are inspectable inputs, not mandates to enter a class.
+
+*Submission note:* Upload these five bullets as a separate editable file named `highlights.docx` (each ≤ 85 characters including spaces).
 
 ## 1. Introduction
-Digital innovation often requires firms to move beyond the technology domains in which they already operate. A firm may have relevant capabilities for entering an adjacent domain, yet its internal patent history alone does not reveal all useful connections. Technology classes co-occur in patent portfolios, firms share technological neighbours, and adoption patterns evolve over time. A knowledge representation can make these relationships explicit and support a prediction system whose recommendations are grounded in identifiable evidence.
+Digital innovation often requires a firm to move into technology classes that are absent from its current patent portfolio. The firm's own history is an incomplete map: classes co-occur across assignees, peers adopt neighbouring technologies, and those relations change over time. A knowledge-based decision-support system can make those relations explicit, but only if the representation used at prediction time could actually have been observed then.
 
-Research has already explored graph convolution, heterogeneous graphs, and link prediction for technology opportunity discovery (TOD). Lee et al. (2021) predict firm-specific opportunities from F-term co-occurrence networks. Park and Geum (2022) use graph-convolutional link prediction to anticipate technology convergence and then map candidates to a firm. Choi et al. (2023) merge assignee, inventor, patent, and technology-area nodes into a technology ecology. Seol et al. (2023) represent firm portfolios as graphs and extract association rules. Later work adds competitor-aware rules, dual citation-network recommendation, and heterogeneous graph neural networks (Wu et al., 2023, 2026; Liu et al., 2025; Zhao et al., 2025). Patent-recommendation studies likewise show that knowledge graphs can support ranking and some forms of explanation (Chen & Deng, 2023; He et al., 2026). Work on predicting innovative firms demonstrates that large-scale digital traces can complement traditional innovation indicators (Kinne & Lenz, 2021). The general idea of graph-based innovation prediction is therefore not, by itself, a sufficient novelty claim. The relevant question is narrower and more falsifiable: when candidate technologies, feature timestamps, and evaluation cutoffs are controlled, do compact, interpretable graph features add predictive value over strong tabular baselines?
+Firm-specific technology opportunity discovery (TOD) already uses patent graphs and link prediction. F-term co-occurrence networks, graph-convolutional convergence models, heterogeneous assignee–inventor–technology ecologies, and rule-based portfolio graphs have all been used to propose new classes, terms, or patents for a target firm [1–7]. Related work searches knowledge networks and hierarchical semantic graphs for opportunities that are not yet covered by any single patent [8,9], or predicts converging knowledge flows in citation networks [10]. Patent-portfolio and co-classification studies similarly treat opportunity discovery as a mapping from a firm's existing codes to adjacent fields [11–14]. Machine-learning link prediction has also been used to move from opportunity lists to candidate solutions and to forecast previously unconnected classification pairs [15–18]. Topology-based patent recommendation with subject–action–object embeddings provides a firm-specific ranking analogue in the engineering-management literature [19].
 
-This question matters for *Knowledge-Based Systems* because an intelligent decision-support system should make its knowledge representation explicit, evaluate the contribution of that representation, and disclose when the knowledge layer does not improve decisions. Knowledge graphs can support explainability, but the existence of a graph does not automatically make a model interpretable or reliable (Rajabi & Etminani, 2024). Temporal leakage is especially consequential in innovation forecasting: future patent classifications, future firm–technology links, or labels that would not yet have been observable can make a retrospective model look stronger than a deployable one.
+The existence of a graph is not, by itself, a novelty claim for *Knowledge-Based Systems*. Knowledge-graph and graph-embedding surveys distinguish representation, acquisition, relational scoring, and downstream use [20–24]. Explainable knowledge-graph recommenders further show that inspectable relations can support ranking, but only when the knowledge layer is isolated and evaluated [25,26]. In innovation forecasting the corresponding evaluation failure mode is temporal leakage: future classifications, future firm–class edges, or labels that would not yet have been observable can make a retrospective model look stronger than a deployable one.
 
-This paper therefore reports a leakage-aware, firm-specific technology-entry benchmark on public USPTO PatentsView records. It does not claim that patenting captures all innovation, that prediction is causal, or that the approach is the first graph-based technology-opportunity method. Its narrower contribution is a reproducible experimental design that tests the incremental value of auditable relational features under a common temporal protocol, together with the measured out-of-time results from that protocol.
+This paper therefore asks a narrower, falsifiable question. When candidate technologies, feature timestamps, and evaluation cutoffs are controlled, do compact relational features add out-of-time value over strong tabular baselines? The contribution is a many-firm, leakage-aware technology-entry benchmark on public PatentsView records [27,28], not a new graph neural network and not a claim that patenting equals innovation. Three hypotheses are pre-specified:
 
-## 2. Research gap and research question
-### 2.1 What is known
-Four strands are directly relevant. First, firm-specific TOD methods predict new technology classes, F-terms, or patents for a target firm from portfolio graphs, citation networks, or association rules (Lee et al., 2021; Park & Geum, 2022; Choi et al., 2023; Seol et al., 2023; Liu et al., 2025; Zhao et al., 2025; Wu et al., 2026). These studies show that relational structure can surface opportunities, but they typically validate one or a few firms, a single industry case, or a GNN/link-prediction score without a many-firm, embargoed chronological comparison against tabular baselines. Second, patent-recommendation systems use knowledge graphs for ranking and explanation (Chen & Deng, 2023; He et al., 2026); their target is often a patent to acquire or read, not next-year class entry. Third, knowledge-graph explainability research distinguishes feature extraction, relationship extraction, graph construction, and reasoning rather than treating “knowledge graph” as a single technique (Rajabi & Etminani, 2024). Fourth, public patent infrastructure, including PatentsView, provides disambiguated organization and technology data, subject to documented coverage and matching limitations (USPTO, 2025, 2026).
+- **H1 (incremental value):** the graph-feature model achieves higher average precision than the strongest tabular baseline on the held-out future period.
+- **H2 (relational contribution):** removing graph-derived features reduces performance relative to the full model when the learner is held constant.
+- **H3 (temporal robustness):** any improvement is directionally stable across more than one chronological cutoff.
 
-The search behind this set is documented in `data/LITERATURE_SEARCH.md`. It used Crossref, publisher records, and RePEc for 2018–2026 queries on firm-specific TOD, patent knowledge graphs, and link prediction. It is not a Scopus/Web of Science systematic review.
+H1 is interpreted against the best tabular model on average precision. H2 is the pre-specified same-learner contrast (graph-feature random forest versus tabular random forest). H3 requires a second cutoff; only the protocol's single split is executed here.
 
-### 2.2 Specific gap
-The literature does not justify a blanket claim that graph models outperform conventional methods. After the expanded search, a useful gap remains: a **compact, many-firm technology-entry benchmark in which candidate construction, inspectable graph features, temporal availability, and incremental model value are all auditable in one protocol**. Most retrieved TOD papers still centre on opportunity lists for a focal firm or on model architecture rather than on leakage-controlled, out-of-time discrimination across thousands of assignees. This is a scoped synthesis of the retrieved corpus, not a claim that no prior study has ever used temporal validation.
+## 2. Data and knowledge representation
+### 2.1 PatentsView extract
+The source is the USPTO PatentsView granted-patent metadata dump covering records through 31 December 2024, archived on Zenodo [27]. Later PatentsView files are hosted on the USPTO Open Data Portal [28] behind authenticated access; this study therefore uses the last fully public dump. Files `g_patent.tsv.zip`, `g_assignee_disambiguated.tsv.zip`, and `g_cpc_current.tsv.zip` were downloaded on 23 October 2026 and joined on `patent_id`. Provenance, hashes, and inclusion rules are stored with the normalized extract.
 
-### 2.3 Research question and hypotheses
-**RQ:** Do temporally available knowledge-graph features improve out-of-time prediction of a firm's entry into a previously unadopted technology class, compared with conventional firm- and technology-level predictors?
+Normalization produces one unique row per firm–year–CPC subclass. The firm identifier is the PatentsView disambiguated `assignee_id`. Only assignees with a non-empty organization name are retained. Year is the grant year. Withdrawn patents and non-utility grants are excluded. CPC subclass codes are the first four alphanumeric characters of `cpc_subclass`; former-USPC indexing subclasses `Y10*` are dropped. Joint assignees create multiple firm–technology rows. Firms must have at least eight distinct grant years, eight distinct subclasses, twenty firm–year–CPC rows, and at least one G or H subclass in 2010–2023. After these filters the extract contains 1,453,416 rows, 10,878 firms, 14 years, and 668 subclasses.
 
-- **H1 (incremental value):** The graph-feature model achieves higher average precision than the strongest tabular baseline on the held-out future period.
-- **H2 (relational contribution):** Removing graph-derived features reduces performance relative to the full model.
-- **H3 (temporal robustness):** Any observed improvement is directionally stable across additional chronological cutoffs, rather than being confined to one test window.
+Patent-based class entry is a proxy, not a measure of commercial success, non-patented innovation, or digital-transformation adoption. The target below is therefore **first observed CPC-subclass entry in granted patents**.
 
-H1 is interpreted against the strongest tabular baseline on the primary metric. The pre-specified same-learner comparison is M3 versus M2 and is the basis for H2. H3 requires more than one chronological cutoff; the execution reported here uses the single pre-specified split.
+### 2.2 Unit of analysis and graph
+Let $F$ be the set of firms and $C$ the candidate CPC subclasses. For prediction year $t$, the time-indexed knowledge graph is
 
-## 3. Data and operational definitions
-### 3.1 Data source and scope
-The source is the USPTO PatentsView granted-patent metadata dump covering records through 31 December 2024, archived on Zenodo (USPTO, 2025). USPTO now hosts later PatentsView files, including coverage through 31 December 2025, on the Open Data Portal (USPTO, 2026); those files require authenticated ODP access. This study therefore uses the last fully public dump. Files `g_patent.tsv.zip`, `g_assignee_disambiguated.tsv.zip`, and `g_cpc_current.tsv.zip` were downloaded on 23 October 2026. The join key is `patent_id`. Exact hashes, row counts, and inclusion rules are stored in `data/processed/firm_year_cpc.provenance.json`.
+\begin{equation}
+G_t = (F, C, E_t),\qquad E_t = \{(f,c)\in F\times C:\ \text{firm } f \text{ has class } c \text{ in a grant year }\le t\}.
+\end{equation}
 
-Normalization produces one unique row per firm–year–CPC subclass (`firm_id`, `year`, `cpc_code`). `firm_id` is the PatentsView disambiguated `assignee_id`. Only assignees with a non-empty organization name are kept; individuals are dropped. `year` is the grant year from `patent_date`. Withdrawn patents and non-utility grants are excluded. CPC subclass codes are the first four alphanumeric characters of `cpc_subclass` in `g_cpc_current`. Former-USPC indexing subclasses `Y10*` are dropped because they are tagging codes rather than inventive classes. Joint assignees create multiple firm–technology rows. Firms must have at least eight distinct grant years, eight distinct subclasses, twenty firm–year–CPC rows, and at least one G or H subclass in 2010–2023, matching the paper's digital-innovation scope. After these filters the extract contains 1,453,416 rows, 10,878 firms, 14 years, and 668 subclasses.
+Technology–technology relations are induced from co-occurrence in portfolios observed by $t$. Future edges are not used to score a prediction made at $t$. The candidate universe $C$ is the 30 most frequent subclasses in the 2010–2012 burn-in window and is then held fixed. The design estimates entry into classes already visible in that window; it does not claim to predict entirely unseen subclasses.
 
-Patent activity is an imperfect proxy for innovation. It undercounts non-patented, service, organizational, and process innovations; differs by sector and firm size; and reflects patenting strategy as well as inventive output. The paper consequently interprets the outcome as **technology-class entry observed in patent data**, not as a comprehensive measure of entrepreneurship or innovation.
+The unit of analysis is a firm–candidate–year triple $(f,c,t)$ with $c\notin P_{f,t}$, where $P_{f,t}$ is the set of classes observed for $f$ by the end of year $t$. The binary target is first entry in the following year:
 
-### 3.2 Unit of analysis and outcome
-The unit is a firm–candidate-technology–prediction-year triple. For firm (f), candidate technology (c), and prediction year (t), the binary target is one when the firm has no observed patent in class (c) by the end of year (t) and first appears in that class in year (t+1). Otherwise, among eligible candidates, the target is zero. Firms must have patent history before the prediction year. The candidate technology universe is fixed using a pre-specified burn-in period and retained throughout evaluation; it is not selected using the future test period. This design estimates entry into technology classes already visible in the initial data window and does not claim to predict entirely unseen classes.
+\begin{equation}
+y_{f,c,t} = \mathbf{1}\bigl[c \notin P_{f,t}\ \text{and}\ c \in P_{f,t+1}\bigr].
+\end{equation}
 
-### 3.3 Knowledge graph
-Let (G_t=(F,C,E_t)), where (F) is the set of firms, (C) is the fixed set of candidate CPC classes, and (E_t) contains firm–technology edges observed no later than year (t). Technology–technology relations are induced from co-occurrence in firm portfolios observed by (t). The graph is time-indexed: future edges are not used to calculate a prediction made at (t).
+Eligible prediction years are 2013–2022. Training uses 2013–2019, 2020 is embargoed, and 2021–2022 form the test window. Every feature for $(f,c,t)$ is computed from records dated $\le t$.
 
-Graph features are intentionally simple and inspectable: (i) common-neighbour/co-occurrence strength between a firm's existing portfolio and a candidate class; (ii) candidate-class prevalence and recent growth calculated from information available by (t); and (iii) a historical peer-adoption signal among firms with overlapping technology portfolios. Conventional features describe firm portfolio size and historical firm–technology activity volume, as well as candidate-class popularity. The full model adds the relational features to the same conventional predictors used by the tabular baseline. No graph neural network is claimed or implemented in this compact benchmark.
+### 2.3 Feature blocks
+Two feature blocks are used. The conventional block describes firm history and class activity:
 
-## 4. Experimental design
-### 4.1 Models and controlled comparison
-Three models are compared on the same candidate pairs:
+\begin{align}
+x^{\mathrm{size}}_{f,t} &= |P_{f,t}|,\\
+x^{\mathrm{act}}_{f,t} &= \text{number of firm–year–class rows for } f \text{ with year }\le t,\\
+x^{\mathrm{prev}}_{c,t} &= n_{c,t}/|F_t|,\\
+x^{\mathrm{gr}}_{c,t} &= \mathrm{clip}\bigl((n^{\mathrm{rec}}_{c,t}-n^{\mathrm{pri}}_{c,t})/\max(1,n^{\mathrm{pri}}_{c,t}),\,-5,5\bigr).
+\end{align}
 
-1. **M1 — Logistic regression:** a transparent linear baseline.
-2. **M2 — Random forest:** a nonlinear tabular baseline.
-3. **M3 — Graph-feature random forest:** the same random-forest learner augmented with the pre-specified graph-derived features.
+Here $n_{c,t}$ is the number of firms with class $c$ by year $t$, $F_t$ is the set of firms with any history by $t$, $n^{\mathrm{rec}}_{c,t}$ counts firms active in $c$ in years $\{t-1,t\}$, and $n^{\mathrm{pri}}_{c,t}$ counts firms active in $c$ in years $\{t-3,t-2\}$.
 
-The primary comparison is M3 against M2 because it isolates the incremental value of the relational feature block while holding the learning algorithm constant. M1 provides a simpler reference point. Hyperparameters, class weighting, candidate universe, and feature availability must be fixed before the final test is evaluated. If tuning is performed, it must occur only within the training period, preferably using rolling-origin validation.
+The graph block is intentionally inspectable. Let $\omega_t(c,c')$ be the number of historical portfolios in $G_t$ that contain both $c$ and $c'$, and let $\mathrm{peers}_{f,t}$ be other firms that share at least one class with $f$ by year $t$. Then
 
-### 4.2 Temporal split and leakage controls
-Rows are ordered by prediction year. Training examples must have outcome years that end before the test prediction window begins; an embargo year is excluded between the final training prediction year and the first test prediction year. Every feature for a firm–candidate pair is calculated from records available by that pair's prediction cutoff. The candidate universe is fixed from the initial burn-in period. Preprocessing is fitted only on training rows. Test labels are used only for final scoring and uncertainty estimation. The final study should repeat the analysis at more than one chronological cutoff if the number of years permits.
+\begin{align}
+x^{\mathrm{cn}}_{f,c,t} &= \sum_{c'\in P_{f,t}}\omega_t(c,c'),\\
+x^{\mathrm{peer}}_{f,c,t} &= \bigl|\{p\in\mathrm{peers}_{f,t}: c\in P_{p,t}\}\bigr|/\max\bigl(1,|\mathrm{peers}_{f,t}|\bigr),\\
+x^{\mathrm{deg}}_{c,t} &= \bigl|\{c'\in C: \omega_t(c,c')>0\}\bigr|.
+\end{align}
 
-This protocol addresses common forms of leakage but does not by itself guarantee validity. The implementation must be audited for firm identity duplication, patent publication/grant timing, CPC revision effects, joint assignees, and any future information embedded in the source release. For a real deployment claim, the prediction date must be defined precisely—for example, year-end—and all features must be available at that date.
+Common-neighbour strength $x^{\mathrm{cn}}$ is a weighted overlap between the firm's portfolio and the candidate. Peer prevalence $x^{\mathrm{peer}}$ is the historical adoption rate among technological neighbours. Degree $x^{\mathrm{deg}}$ is the candidate's co-occurrence connectivity. No graph neural network is trained.
 
-### 4.3 Metrics and statistical analysis
-Technology-entry prediction is imbalanced: most firm–candidate pairs are expected not to become positive in any one year. The primary metric is average precision, reported with the test positive prevalence. ROC-AUC is secondary because it can appear favourable under severe imbalance. Balanced accuracy is reported at a threshold selected only on training data; Brier score is reported for probability quality. Report the number of firms, candidate classes, firm–candidate–year rows, positives, and prevalence for each split.
+**Algorithm 1.** Leakage-aware feature construction at prediction year $t$  
+**Input:** firm–year–CPC records with grant year $\le t$; fixed candidate set $C$  
+**Output:** feature vectors for eligible pairs $(f,c)$  
+1: Build portfolios $P_{f,t}$ and edge set $E_t$ from records dated $\le t$.  
+2: Count co-occurrence weights $\omega_t(c,c')$ inside those portfolios.  
+3: Compute class prevalence and clipped recent growth from years $\le t$.  
+4: For each firm $f$ with $P_{f,t}\neq\emptyset$ and each $c\in C\setminus P_{f,t}$:  
+5:     compute the conventional block in Eqs. (3)–(6) and the graph block in Eqs. (7)–(9);  
+6:     set $y_{f,c,t}$ from the firm's classes in year $t+1$ (never used as a feature).  
+7: Return the pair panel for year $t$.
 
-For the primary M3–M2 comparison, use paired bootstrap resampling of held-out firm–candidate pairs and report a 95% interval for the metric difference. Because repeated rows from the same firm are dependent, the preferred final analysis resamples firms as clusters, preserving all their held-out rows together. If a cluster bootstrap is computationally infeasible, this limitation must be reported and row-level intervals treated as provisional. H1 is supported only if the pre-specified primary comparison is positive and uncertainty is reported; a point estimate alone is insufficient. Multiple time cutoffs and feature ablations are robustness analyses, not opportunities to select the most favourable result.
+## 3. Experimental design
+Three models are compared on the same candidate pairs (Table 1):
 
-## 5. Results
-Results are taken from `outputs/metrics.csv`, `outputs/paired_bootstrap.csv`, and `outputs/run_summary.txt` after running `src/experiment.py` on the normalized PatentsView file. Demo-mode numbers are not used.
+1. **M1**, $\ell_2$-regularized logistic regression with balanced class weights, using only the conventional block.
+2. **M2**, a random forest ($300$ trees, $\sqrt{p}$ features, minimum leaf size $5$, balanced subsample weights), using the same conventional block.
+3. **M3**, the same forest as M2 with the graph block appended.
 
-The candidate universe is the 30 most common CPC subclasses in the 2010–2012 burn-in window. Training uses prediction years 2013–2019 (1,540,698 pairs). 2020 is embargoed. The test window is prediction years 2021–2022 (455,458 pairs; 10,411 firms; 30 classes). Test-set positive prevalence is 1.11% (about 5,057 positive entries). Thresholds were chosen on the last training prediction year (2019), not on the test labels.
+The primary contrast is M3 versus M2 because it isolates the relational features while holding the learner fixed. M1 is a transparent linear reference. Hyperparameters were fixed before the test window was scored. Numeric preprocessing (median imputation and standardization) is fitted on training rows only. The decision threshold for balanced accuracy is chosen on prediction year 2019, the last training year, by maximizing balanced accuracy on that year; test labels are not used to choose a threshold.
 
-**Table 1. Model comparison and the question each comparison addresses**
+Technology-entry is rare. The primary metric is average precision, always reported with the test positive prevalence. ROC-AUC is secondary because it can look favourable under severe imbalance. Balanced accuracy is reported at the training-year threshold. Brier score is reported for probability quality. For M3 versus M2, a paired bootstrap resamples held-out firms as clusters, retaining all of a firm's test pairs together, and forms a $95\%$ interval for the average-precision difference from $1{,}000$ replicates. H1 is supported only if the graph model beats the strongest tabular baseline on average precision with uncertainty. H2 is supported if the M3–M2 interval excludes no improvement. Multiple cutoffs would be required for H3; they are not used here to select a favourable window.
 
-| Model | Input feature blocks | Comparison purpose |
+## 4. Results
+Results are taken from the versioned outputs of `src/experiment.py` on the normalized PatentsView file. Synthetic `--demo` numbers are not reported.
+
+The candidate universe is the 30 most common CPC subclasses in 2010–2012. Training uses prediction years 2013–2019 ($1{,}540{,}698$ pairs). Year 2020 is embargoed. The test window is 2021–2022 ($455{,}458$ pairs; $10{,}411$ firms; $30$ classes). Test-set positive prevalence is $1.11\%$ ($5{,}057$ first entries). Thresholds were chosen on 2019.
+
+**Table 1.** Model comparison and the question each contrast addresses.
+
+| Model | Feature block | Purpose |
 |---|---|---|
-| M1: Logistic regression | Firm history + candidate-class activity | Transparent tabular baseline |
-| M2: Random forest | Same conventional features as M1 | Nonlinear tabular baseline; same learner as M3 |
-| M3: Graph-feature random forest | M2 features + temporal relational features | Incremental value of inspectable graph features |
+| M1 logistic regression | Firm history and class activity | Transparent tabular baseline |
+| M2 random forest | Same conventional features as M1 | Nonlinear tabular baseline; same learner as M3 |
+| M3 graph-feature forest | M2 features plus Eqs. (7)–(9) | Incremental value of inspectable graph features |
 
-**Table 2. Held-out test performance (prediction years 2021–2022)**
+**Table 2.** Held-out performance on prediction years 2021–2022. Positive prevalence $=0.0111$. Random ranking would yield average precision near that base rate. The paired firm-cluster bootstrap for M3 minus M2 average precision is $\Delta\mathrm{AP}=0.0172$ ($95\%$ interval $0.0155$ to $0.0191$; $1{,}000$ firm clusters).
 
 | Model | Average precision | ROC-AUC | Balanced accuracy | Brier score |
 |---|---:|---:|---:|---:|
@@ -95,73 +128,103 @@ The candidate universe is the 30 most common CPC subclasses in the 2010–2012 b
 | M2 random forest | 0.0155 | 0.597 | 0.573 | 0.046 |
 | M3 graph-feature forest | 0.0326 | 0.748 | 0.684 | 0.025 |
 
-Positive prevalence = 0.0111. Average precision should be read against that base rate. Random ranking would be near 0.011.
+The interval for M3 minus M2 excludes zero, so the pre-specified same-learner comparison supports **H2**: removing the graph block reduces average precision. M3 also has the best ROC-AUC, balanced accuracy, and Brier score. Absolute average precision remains low for all models ($0.033$ against a $1.11\%$ base rate). Fig. 1 records the pipeline used to obtain Table 2; Fig. 2 records the split.
 
-**Table 3. Paired firm-cluster bootstrap for M3 minus M2 average precision**
+**H1 is not supported on the pre-specified reading.** The strongest tabular model on average precision is M1 ($0.0313$), not M2 ($0.0155$). M3's advantage over M1 is $0.0013$ and has no pre-specified cluster interval. Logistic regression is therefore a competitive ranking baseline; the forest without graph features is not. **H3 is not tested:** only one embargoed cutoff was run.
 
-| Contrast | Δ average precision | 95% interval | Replicates |
-|---|---:|---|---:|
-| M3 − M2 | 0.0172 | 0.0155 to 0.0191 | 1,000 firm clusters |
-
-The interval excludes zero, so the pre-specified same-learner comparison supports H2: removing graph features reduces average precision. M3 also has the best ROC-AUC, balanced accuracy, and Brier score. Absolute average precision remains low for all models.
-
-H1 is only weakly addressed. The strongest tabular model on average precision is M1 (0.0313), not M2 (0.0155). M3's advantage over M1 is 0.0013 and has no pre-specified cluster bootstrap. Logistic regression is therefore a competitive ranking baseline; the forest without graph features is not. H3 is not tested: only the protocol's single chronological split was run.
-
-**Figure 1. Knowledge-graph feature pipeline and decision-support architecture.** Time-stamped patent relations become firm–technology graph features and are compared with conventional predictors under one shared evaluation protocol.
+**Fig. 1.** Knowledge-graph feature pipeline. Time-stamped PatentsView relations become the graph $G_t$, inspectable features, and a three-model comparison under one chronological protocol.
 
 ![Figure 1. Knowledge-graph feature pipeline](figures/figure1_architecture.svg)
 
-**Figure 2. Leakage-aware temporal evaluation protocol.** Burn-in defines the candidate universe; training labels, an embargo year, and later test outcomes are separated. This is a protocol diagram.
+**Fig. 2.** Executed leakage-aware split. Burn-in years 2010–2012 fix the candidate universe; training uses 2013–2019; 2020 is embargoed; 2021–2022 are scored but never used for fitting. This is a protocol diagram, not a performance chart.
 
 ![Figure 2. Temporal evaluation protocol](figures/figure2_evaluation.svg)
 
-**Figure 3. Observed future-period scores.** Average precision, ROC-AUC, and balanced accuracy on 2021–2022 firm–candidate pairs. Average precision bars are short because the task is rare-event ranking, not because the figure is synthetic.
+## 5. Discussion
+On this extract, inspectable graph features added average-precision value when the learner was held constant. Co-occurrence, common-neighbour, and peer-adoption signals therefore contain information that the forest does not recover from portfolio size, activity, class prevalence, and recent growth alone. That finding is consistent with TOD studies that treat relational structure as informative [1–7,14,19], but it does not reproduce their typical claim of operational opportunity lists for one focal firm. The many-firm, embargoed protocol is stricter, and the absolute scores are modest.
 
-![Figure 3. Model comparison on the held-out period](figures/figure3_model_comparison.png)
+The result also warns against treating “nonlinear model” as a substitute for a linear baseline. M1 matched M3 closely on average precision and beat M2 by a wide margin. Class-weighted logistic regression, however, had a much worse Brier score than either forest, so its scores should not be read as frequencies. For decision support, ranking and calibration must be reported together [25,26].
 
-## 6. Discussion
-On this PatentsView extract, inspectable graph features added average-precision value when the learner was held constant: M3 beat M2 by 0.017 AP, and the firm-clustered interval did not include zero. That is evidence that co-occurrence, common-neighbour, and peer-adoption signals contain information that a random forest does not recover from firm size, activity, class prevalence, and recent growth alone. It is not evidence that graph features dominate every tabular model. Logistic regression matched M3 closely on average precision and beat M2 by a wide margin, which warns against treating “nonlinear model” as a substitute for a linear baseline.
+The practical implication is bounded. Average precision of $0.033$ against a $1.11\%$ base rate is better than random ranking, but most highly scored firm–class pairs will still not enter next year. The system can prioritize review lists; it cannot authorize entry. Opportunity ranking remains an input to strategy, cost, regulation, capability, and demand, none of which are in the target [11,13]. The knowledge layer here is a small, auditable feature block rather than an opaque embedding, which is the representation style advocated by graph-embedding and knowledge-graph surveys when explanations are required [20–24].
 
-The practical implication is bounded. Average precision of 0.033 against a 1.11% base rate is better than random ranking, but most highly scored firm–class pairs will still not enter next year. The system can prioritize review lists; it cannot authorize entry decisions. Calibration also differs: class-weighted logistic regression had a much worse Brier score than either forest, so probability-like outputs from M1 should not be treated as frequencies.
+The contribution is therefore not another GNN case study [2,6,8]. It is a compact test of whether a relational block earns its place next to standard activity features when leakage is controlled. H3 remains open; M3 versus M1 was not the pre-specified bootstrap contrast; grant year is not application year; and CPC revisions are not concorded.
 
-The result does not establish that a firm should enter a technology, that graph features cause innovation, or that the model generalizes to countries, pre-grant publications, or firms without G/H activity. H3 remains open because only one embargoed cutoff was evaluated. A second cutoff, sector slices, and an explicit M3–M1 cluster interval would be the next robustness steps—not a search for a more favourable split.
+Limitations follow from the design. Assignee disambiguation and grant timing introduce measurement error [27,28]. The fixed candidate universe excludes classes absent from 2010–2012. Graph features may favour patent-intensive firms, and holdout performance can deteriorate under drift. Model scores should not be used to deny funding or to make high-stakes decisions without independent validation and human review.
 
-For *Knowledge-Based Systems*, the value is a compact, inspectable knowledge-based predictor with a falsifiable evaluation. Relative to the retrieved TOD literature, the contribution is not another GNN case study. It is a many-firm, leakage-controlled test of whether a small relational feature block earns its place next to standard activity features.
-
-## 7. Limitations, reproducibility, and responsible use
-First, patent-based class entry is not equivalent to entrepreneurial success, commercial innovation, or digital transformation adoption. Second, assignee disambiguation and patent timing introduce measurement error. Third, the fixed candidate universe excludes technologies absent from the burn-in window; results do not cover open-ended discovery of entirely new classes. Fourth, graph features may favour firms in patent-intensive sectors. Fifth, temporal holdout performance can deteriorate under technology and market drift. Sixth, patent data are not a substitute for confidential strategy, and model scores should not be used to deny funding or make high-stakes decisions without independent validation and human review.
-
-For reproducibility, this repository archives the Zenodo source DOI, download date, preparation script, normalized-file hash, inclusion criteria, random seed, temporal cutoffs, and model outputs. The `--demo` mode remains a software smoke test; those numbers are not cited above. Remaining checks include alternative grant-versus-application timing, CPC revision concordance, and a second chronological cutoff.
-
-## 8. Conclusion
+## 6. Conclusion
 This short communication tests whether temporal knowledge-graph features improve firm-specific technology-entry prediction over conventional models. On USPTO PatentsView organization assignees from 2010–2023, graph features improved the random forest on a 2021–2022 holdout, with a firm-clustered interval that excluded no gain. Logistic regression remained a strong ranking baseline, and absolute average precision stayed low. Relational features therefore earn a place in this decision-support stack only as incremental, inspectable signals—not as a claim of easy or causal opportunity discovery.
 
-## Data and code availability
-**Data:** USPTO PatentsView granted-patent metadata through 31 December 2024, Zenodo DOI 10.5281/zenodo.15058362, downloaded 23 October 2026. Normalized `firm_id,year,cpc_code` file and provenance: `data/processed/`. Raw TSV dumps are reproduced with `src/prepare_patentsview.py` and are not stored in git.  
-**Code:** [GitHub repository](https://github.com/eeshwar-research/research-paper).  
-**Outputs:** `outputs/metrics.csv`, `outputs/paired_bootstrap.csv`, `outputs/run_summary.txt`, and `figures/figure3_model_comparison.png`.
+## CRediT authorship contribution statement
+**Eeshwar:** Conceptualization, Methodology, Software, Formal analysis, Data curation, Writing – original draft, Writing – review and editing.
 
-## Declarations
-**Funding:** To be completed by the author.  
-**Competing interests:** To be completed by the author.  
-**Author contributions:** To be completed by the author.  
-**Use of AI-assisted tools:** Disclose the use of AI-assisted drafting and coding support in accordance with the target journal's current policy. The author must verify the manuscript, code, citations, and results and take responsibility for the final submission.
+## Declaration of competing interest
+The author declares that there are no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+## Funding
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
+
+## Declaration of generative AI and AI-assisted technologies in the manuscript preparation process
+During the preparation of this work the author used Cursor-hosted AI tools to support literature metadata checking, manuscript language editing, and code documentation. After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article. The tools were not used to generate primary experimental images or to invent sources, data, or results.
+
+## Data availability
+The PatentsView granted-patent metadata used in this study are available from Zenodo, DOI [10.5281/zenodo.15058362](https://doi.org/10.5281/zenodo.15058362) [27]. The normalized `firm_id,year,cpc_code` extract, provenance file, preparation script, experiment code, and measured outputs are in the accompanying repository: https://github.com/eeshwar-research/research-paper. Raw TSV dumps are reproduced with `src/prepare_patentsview.py` and are not stored in git.
+
+## Acknowledgements
+The author thanks the USPTO PatentsView programme for publishing disambiguated patent metadata.
 
 ## References
-1. Chen, H., & Deng, W. (2023). Interpretable patent recommendation with knowledge graph and deep learning. *Scientific Reports, 13*, 2586. https://doi.org/10.1038/s41598-023-28766-y
-2. Choi, J., Lee, C., & Yoon, J. (2023). Exploring a technology ecology for technology opportunity discovery: A link prediction approach using heterogeneous knowledge graphs. *Technological Forecasting and Social Change, 186*, 122161. https://doi.org/10.1016/j.techfore.2022.122161
-3. He, S., Guan, X., & Ran, C. (2026). A personalized patent recommendation system using knowledge maps to foster enterprise innovation. *Scientific Reports*. https://doi.org/10.1038/s41598-026-52263-7
-4. Kinne, J., & Lenz, D. (2021). Predicting innovative firms using web mining and deep learning. *PLOS ONE, 16*(4), e0249071. https://doi.org/10.1371/journal.pone.0249071
-5. Lee, J., Ko, N., Yoon, J., & Son, C. (2021). An approach for discovering firm-specific technology opportunities: Application of link prediction to F-term networks. *Technological Forecasting and Social Change, 168*, 120746. https://doi.org/10.1016/j.techfore.2021.120746
-6. Liu, Z., Wang, X., & Feng, J. (2025). Generating firm-centric technology opportunities from patent recommendation: A dual link prediction perspective. *Technology Analysis & Strategic Management, 38*(7), 925–942. https://doi.org/10.1080/09537325.2025.2492229
-7. Maraut, S., Dernis, H., Webb, C., Spiezia, V., & Guellec, D. (2008). *The OECD REGPAT database: A presentation*. OECD Science, Technology and Industry Working Papers. https://doi.org/10.1787/241437144144
-8. Park, M., & Geum, Y. (2022). Two-stage technology opportunity discovery for firm-level decision making: GCN-based link-prediction approach. *Technological Forecasting and Social Change, 183*, 121934. https://doi.org/10.1016/j.techfore.2022.121934
-9. Rajabi, E., & Etminani, K. (2024). Knowledge-graph-based explainable AI: A systematic review. *Journal of Information Science, 50*(4), 1019–1029. https://doi.org/10.1177/01655515221112844
-10. Seol, Y., Lee, S., Kim, C., Yoon, J., & Choi, J. (2023). Towards firm-specific technology opportunities: A rule-based machine learning approach to technology portfolio analysis. *Journal of Informetrics, 17*(4), 101464. https://doi.org/10.1016/j.joi.2023.101464
-11. Wu, Y., & Ji, Y. (2023). Identifying firm-specific technology opportunities from the perspective of competitors by using association rule mining. *Journal of Informetrics, 17*(2), 101398. https://doi.org/10.1016/j.joi.2023.101398
-12. United States Patent and Trademark Office. (2025). *Final release of PatentsView metadata, pre-grant and granted (12/31/2024)* [Data set]. Zenodo. https://doi.org/10.5281/zenodo.15058362
-13. United States Patent and Trademark Office (USPTO). (2026). *PatentsView: Research-ready patent data and data downloads*. https://www.uspto.gov/ip-policy/economic-research/patentsview
-14. Wu, Y., Lin, Z., Ji, Y., & Gu, F. (2026). Identifying firm-specific technology opportunities: Heterogeneous graph neural network-based link prediction. *Technovation, 151*, 103405. https://doi.org/10.1016/j.technovation.2025.103405
-15. Zhao, R., Wei, W., & Zhu, Z. (2025). Discovering firm technology opportunities by machine learning prediction method based on firm's technology portfolio. *Technological Forecasting and Social Change, 221*, 124305. https://doi.org/10.1016/j.techfore.2025.124305
+[1] J. Lee, N. Ko, J. Yoon, C. Son, An approach for discovering firm-specific technology opportunities: Application of link prediction to F-term networks, Technol. Forecast. Soc. Change 168 (2021) 120746. https://doi.org/10.1016/j.techfore.2021.120746.
 
-**Reference verification note:** Titles, journals, and DOIs above were checked against Crossref or the publisher landing page on 23 October 2026. The search protocol is in `data/LITERATURE_SEARCH.md`. It is an open-source bibliographic expansion, not a Scopus/Web of Science systematic review. Wu et al. (2026) is indexed in *Technovation*, not *Technological Forecasting and Social Change*.
+[2] M. Park, Y. Geum, Two-stage technology opportunity discovery for firm-level decision making: GCN-based link-prediction approach, Technol. Forecast. Soc. Change 183 (2022) 121934. https://doi.org/10.1016/j.techfore.2022.121934.
+
+[3] J. Choi, C. Lee, J. Yoon, Exploring a technology ecology for technology opportunity discovery: A link prediction approach using heterogeneous knowledge graphs, Technol. Forecast. Soc. Change 186 (2023) 122161. https://doi.org/10.1016/j.techfore.2022.122161.
+
+[4] Y. Seol, S. Lee, C. Kim, J. Yoon, J. Choi, Towards firm-specific technology opportunities: A rule-based machine learning approach to technology portfolio analysis, J. Informetr. 17 (4) (2023) 101464. https://doi.org/10.1016/j.joi.2023.101464.
+
+[5] Y. Wu, Y. Ji, Identifying firm-specific technology opportunities from the perspective of competitors by using association rule mining, J. Informetr. 17 (2) (2023) 101398. https://doi.org/10.1016/j.joi.2023.101398.
+
+[6] Y. Wu, Z. Lin, Y. Ji, F. Gu, Identifying firm-specific technology opportunities: Heterogeneous graph neural network-based link prediction, Technovation 151 (2026) 103405. https://doi.org/10.1016/j.technovation.2025.103405.
+
+[7] R. Zhao, W. Wei, Z. Zhu, Discovering firm technology opportunities by machine learning prediction method based on firm's technology portfolio, Technol. Forecast. Soc. Change 221 (2025) 124305. https://doi.org/10.1016/j.techfore.2025.124305.
+
+[8] Z. Liu, J. Feng, L. Uden, Technology opportunity analysis using hierarchical semantic networks and dual link prediction, Technovation 128 (2023) 102872. https://doi.org/10.1016/j.technovation.2023.102872.
+
+[9] H. Ren, Y. Zhao, Technology opportunity discovery based on constructing, evaluating, and searching knowledge networks, Technovation 101 (2021) 102196. https://doi.org/10.1016/j.technovation.2020.102196.
+
+[10] I. Park, B. Yoon, Technological opportunity discovery for technological convergence based on the prediction of technology knowledge flow in a citation network, J. Informetr. 12 (4) (2018) 1199–1222. https://doi.org/10.1016/j.joi.2018.09.007.
+
+[11] X. Shi, L. Cai, H. Song, Discovering potential technology opportunities for fuel cell vehicle firms: A multi-level patent portfolio-based approach, Sustainability 11 (22) (2019) 6381. https://doi.org/10.3390/su11226381.
+
+[12] H.C. Wang, Y.C. Chi, P.L. Hsin, Constructing patent maps using text mining to sustainably detect potential technological opportunities, Sustainability 10 (10) (2018) 3729. https://doi.org/10.3390/su10103729.
+
+[13] L. Feng, Y. Niu, Z. Liu, J. Wang, K. Zhang, Discovering technology opportunity by keyword-based patent analysis: A hybrid approach of morphology analysis and USIT, Sustainability 12 (1) (2020) 136. https://doi.org/10.3390/su12010136.
+
+[14] S.K. Yi, C.H. Song, A dual-level prediction approach for uncovering technology convergence opportunities: The case of electric vehicles, Sustainability 17 (8) (2025) 3607. https://doi.org/10.3390/su17083607.
+
+[15] Z. Wang, W. Guo, H. Shao, L. Wang, Z. Chang, Y. Zhang, From technology opportunities to solutions generation via patent analysis: Application of machine learning-based link prediction, Adv. Eng. Inform. 62 (2024) 102944. https://doi.org/10.1016/j.aei.2024.102944.
+
+[16] Y. Geum, M. Kim, How to identify promising chances for technological innovation: Keygraph-based patent analysis, Adv. Eng. Inform. 46 (2020) 101155. https://doi.org/10.1016/j.aei.2020.101155.
+
+[17] Z. Liu, J. Feng, L. Uden, From technology opportunities to ideas generation via cross-cutting patent analysis: Application of generative topographic mapping and link prediction, Technol. Forecast. Soc. Change 192 (2023) 122565. https://doi.org/10.1016/j.techfore.2023.122565.
+
+[18] J. Zhao, J. Li, X. Xi, W. Liu, Embracing technological opportunities based on heterogeneous networks: An integrated link prediction approach for technology convergence of firms, Technol. Forecast. Soc. Change 229 (2026) 124701. https://doi.org/10.1016/j.techfore.2026.124701.
+
+[19] Z. Liu, X. Wang, J. Feng, Firm-specific patent recommendation using topology-based link prediction and SAO embedding method, IEEE Trans. Eng. Manag. 72 (2025) 2097–2115. https://doi.org/10.1109/TEM.2025.3570659.
+
+[20] Q. Wang, Z. Mao, B. Wang, L. Guo, Knowledge graph embedding: A survey of approaches and applications, IEEE Trans. Knowl. Data Eng. 29 (12) (2017) 2724–2743. https://doi.org/10.1109/TKDE.2017.2754499.
+
+[21] S. Ji, S. Pan, E. Cambria, P. Marttinen, P.S. Yu, A survey on knowledge graphs: Representation, acquisition, and applications, IEEE Trans. Neural Netw. Learn. Syst. 33 (2) (2022) 494–514. https://doi.org/10.1109/TNNLS.2021.3070843.
+
+[22] M. Nickel, K. Murphy, V. Tresp, E. Gabrilovich, A review of relational machine learning for knowledge graphs, Proc. IEEE 104 (1) (2016) 11–33. https://doi.org/10.1109/JPROC.2015.2483592.
+
+[23] H. Cai, V.W. Zheng, K.C.-C. Chang, A comprehensive survey of graph embedding: Problems, techniques, and applications, IEEE Trans. Knowl. Data Eng. 30 (9) (2018) 1616–1637. https://doi.org/10.1109/TKDE.2018.2807452.
+
+[24] P. Goyal, E. Ferrara, Graph embedding techniques, applications, and performance: A survey, Knowl.-Based Syst. 151 (2018) 78–94. https://doi.org/10.1016/j.knosys.2018.03.022.
+
+[25] Z. Yang, S. Dong, HAGERec: Hierarchical attention graph convolutional network incorporating knowledge graph for explainable recommendation, Knowl.-Based Syst. 204 (2020) 106194. https://doi.org/10.1016/j.knosys.2020.106194.
+
+[26] R. Shimizu, M. Matsutani, M. Goto, An explainable recommendation framework based on an improved knowledge graph attention network with massive volumes of side information, Knowl.-Based Syst. 239 (2022) 107970. https://doi.org/10.1016/j.knosys.2021.107970.
+
+[27] United States Patent and Trademark Office, Final release of PatentsView metadata, pre-grant and granted (12/31/2024) [dataset], Zenodo, 2025. https://doi.org/10.5281/zenodo.15058362.
+
+[28] United States Patent and Trademark Office, PatentsView: Research-ready patent data and data downloads, 2026. https://www.uspto.gov/ip-policy/economic-research/patentsview (accessed 23 October 2026).
