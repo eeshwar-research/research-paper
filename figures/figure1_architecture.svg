@@ -1,45 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="320" viewBox="0 0 1400 320">
   <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#000000"/></marker>
-    <style>
-      .box{fill:#ffffff;stroke:#000000;stroke-width:1.8;rx:10}
-      .head{font:700 15px Arial, Helvetica, sans-serif;fill:#000000}
-      .body{font:13px Arial, Helvetica, sans-serif;fill:#000000}
-      .edge{stroke:#000000;stroke-width:2;fill:none;marker-end:url(#arrow)}
-      .small{font:12px Arial, Helvetica, sans-serif;fill:#000000}
-    </style>
+    <marker id="fig1-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#000000"/>
+    </marker>
   </defs>
   <rect width="1400" height="320" fill="#ffffff"/>
-  <rect x="24" y="16" width="310" height="148" class="box"/>
-  <text x="42" y="44" class="head">1  PatentsView grants</text>
-  <text x="42" y="74" class="body">Organization assignees</text>
-  <text x="42" y="96" class="body">Grant years 2010–2023</text>
-  <text x="42" y="118" class="body">CPC subclass (four characters)</text>
-  <text x="42" y="144" class="small">firm_id, year, cpc_code</text>
-  <rect x="372" y="16" width="310" height="148" class="box"/>
-  <text x="390" y="44" class="head">2  Graph G_t</text>
-  <text x="390" y="74" class="body">Firm–class edges dated ≤ t</text>
-  <text x="390" y="96" class="body">Class co-occurrence in C</text>
-  <text x="390" y="118" class="body">Candidates frozen in 2010–2012</text>
-  <text x="390" y="144" class="small">No future edges in features</text>
-  <rect x="720" y="16" width="310" height="148" class="box"/>
-  <text x="738" y="44" class="head">3  Feature blocks</text>
-  <text x="738" y="74" class="body">Size, activity, prevalence, growth</text>
-  <text x="738" y="96" class="body">Common-neighbor; peer adoption</text>
-  <text x="738" y="118" class="body">Candidate co-occurrence degree</text>
-  <text x="738" y="144" class="small">Graph block used only in M3</text>
-  <rect x="1068" y="16" width="308" height="148" class="box"/>
-  <text x="1086" y="44" class="head">4  Same-candidate models</text>
-  <text x="1086" y="74" class="body">M1 logistic regression</text>
-  <text x="1086" y="96" class="body">M2 tabular random forest</text>
-  <text x="1086" y="118" class="body">M3 forest + graph features</text>
-  <text x="1086" y="144" class="small">Primary contrast: M3 versus M2</text>
-  <path d="M334 90 H364" class="edge"/>
-  <path d="M682 90 H712" class="edge"/>
-  <path d="M1030 90 H1060" class="edge"/>
-  <rect x="24" y="184" width="1352" height="120" fill="#ffffff" stroke="#000000" stroke-width="1.8" rx="10"/>
-  <text x="42" y="214" class="head">5  Executed holdout</text>
-  <text x="42" y="242" class="body">Train 2013–2019 (1,540,698 pairs) · embargo 2020 · test 2021–2022 (455,458 pairs; 10,411 firms; 1.11% positives)</text>
-  <text x="42" y="266" class="body">Primary metric: average precision. Uncertainty: firm-cluster bootstrap for M3 − M2.</text>
-  <text x="42" y="290" class="small">Every feature at year t uses records dated ≤ t. The label is first CPC-subclass entry in t+1.</text>
+  <rect x="24" y="16" width="310" height="148" rx="10" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+  <text x="42" y="44" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#000000">1  PatentsView grants</text>
+  <text x="42" y="74" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Organization assignees</text>
+  <text x="42" y="96" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Grant years 2010–2023</text>
+  <text x="42" y="118" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">CPC subclass (four characters)</text>
+  <text x="42" y="144" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">firm_id, year, cpc_code</text>
+  <rect x="372" y="16" width="310" height="148" rx="10" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+  <text x="390" y="44" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#000000">2  Graph G_t</text>
+  <text x="390" y="74" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Firm–class edges dated ≤ t</text>
+  <text x="390" y="96" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Class co-occurrence in C</text>
+  <text x="390" y="118" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Candidates frozen in 2010–2012</text>
+  <text x="390" y="144" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">No future edges in features</text>
+  <rect x="720" y="16" width="310" height="148" rx="10" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+  <text x="738" y="44" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#000000">3  Feature blocks</text>
+  <text x="738" y="74" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Size, activity, prevalence, growth</text>
+  <text x="738" y="96" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Common-neighbor; peer adoption</text>
+  <text x="738" y="118" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Candidate co-occurrence degree</text>
+  <text x="738" y="144" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">Graph block used only in M3</text>
+  <rect x="1068" y="16" width="308" height="148" rx="10" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+  <text x="1086" y="44" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#000000">4  Same-candidate models</text>
+  <text x="1086" y="74" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">M1 logistic regression</text>
+  <text x="1086" y="96" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">M2 tabular random forest</text>
+  <text x="1086" y="118" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">M3 forest + graph features</text>
+  <text x="1086" y="144" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">Primary contrast: M3 versus M2</text>
+  <path d="M334 90 H364" fill="none" stroke="#000000" stroke-width="2" marker-end="url(#fig1-arrow)"/>
+  <path d="M682 90 H712" fill="none" stroke="#000000" stroke-width="2" marker-end="url(#fig1-arrow)"/>
+  <path d="M1030 90 H1060" fill="none" stroke="#000000" stroke-width="2" marker-end="url(#fig1-arrow)"/>
+  <rect x="24" y="184" width="1352" height="120" rx="10" fill="#ffffff" stroke="#000000" stroke-width="1.8"/>
+  <text x="42" y="214" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#000000">5  Executed holdout</text>
+  <text x="42" y="242" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Train 2013–2019 (1,540,698 pairs) · embargo 2020 · test 2021–2022 (455,458 pairs; 10,411 firms; 1.11% positives)</text>
+  <text x="42" y="266" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#000000">Primary metric: average precision. Uncertainty: firm-cluster bootstrap for M3 − M2.</text>
+  <text x="42" y="290" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#000000">Every feature at year t uses records dated ≤ t. The label is first CPC-subclass entry in t+1.</text>
 </svg>
