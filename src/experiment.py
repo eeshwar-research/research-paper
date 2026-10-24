@@ -234,13 +234,13 @@ def write_protocol_figures(figdir: Path):
         "ps.fonttype": 42,
     })
 
-    def box(ax, x, y, w, h, title, lines, facecolor, edge="#1e3a5f"):
+    def box(ax, x, y, w, h, title, lines, facecolor="#ffffff", edge="#000000", linestyle="-"):
         patch = FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.08",
-                               facecolor=facecolor, edgecolor=edge, linewidth=1.3)
+                               facecolor=facecolor, edgecolor=edge, linewidth=1.3, linestyle=linestyle)
         ax.add_patch(patch)
-        ax.text(x + 0.06, y + h - 0.12, title, fontsize=10.5, fontweight="bold", color="#0f172a", va="top")
+        ax.text(x + 0.06, y + h - 0.12, title, fontsize=10.5, fontweight="bold", color="#000000", va="top")
         for i, line in enumerate(lines):
-            ax.text(x + 0.06, y + h - 0.38 - 0.22 * i, line, fontsize=8.8, color="#1e293b", va="top")
+            ax.text(x + 0.06, y + h - 0.38 - 0.22 * i, line, fontsize=8.8, color="#000000", va="top")
 
     fig, ax = plt.subplots(figsize=(11.2, 2.7))
     ax.set_xlim(0, 12)
@@ -248,29 +248,29 @@ def write_protocol_figures(figdir: Path):
     ax.axis("off")
     box(ax, 0.15, 2.15, 2.7, 2.05, "1  PatentsView grants",
         ["Organization assignees", "Grant years 2010–2023", "CPC subclass (four characters)",
-         "firm_id, year, cpc_code"], "#e8eef6")
+         "firm_id, year, cpc_code"])
     box(ax, 3.15, 2.15, 2.7, 2.05, "2  Graph G_t",
         ["Firm–class edges dated ≤ t", "Class co-occurrence in C", "Candidates frozen in 2010–2012",
-         "No future edges in features"], "#e7f2ea")
+         "No future edges in features"])
     box(ax, 6.15, 2.15, 2.7, 2.05, "3  Feature blocks",
         ["Size, activity, prevalence, growth", "Common-neighbor; peer adoption",
-         "Candidate co-occurrence degree", "Graph block used only in M3"], "#f4eee4")
+         "Candidate co-occurrence degree", "Graph block used only in M3"])
     box(ax, 9.15, 2.15, 2.7, 2.05, "4  Same-candidate models",
         ["M1 logistic regression", "M2 tabular random forest", "M3 forest + graph features",
-         "Primary contrast: M3 versus M2"], "#eee8f4")
+         "Primary contrast: M3 versus M2"])
     for x0, x1 in ((2.85, 3.15), (5.85, 6.15), (8.85, 9.15)):
         ax.add_patch(FancyArrowPatch((x0, 3.15), (x1, 3.15), arrowstyle="-|>", mutation_scale=10,
-                                     color="#334155", linewidth=1.4))
+                                     color="#000000", linewidth=1.4))
     eval_box = FancyBboxPatch((0.15, 0.12), 11.7, 1.85, boxstyle="round,pad=0.02,rounding_size=0.08",
-                              facecolor="#ffffff", edgecolor="#64748b", linewidth=1.3)
+                              facecolor="#ffffff", edgecolor="#000000", linewidth=1.3)
     ax.add_patch(eval_box)
-    ax.text(0.3, 1.7, "5  Executed holdout", fontsize=10.5, fontweight="bold", color="#0f172a")
+    ax.text(0.3, 1.7, "5  Executed holdout", fontsize=10.5, fontweight="bold", color="#000000")
     ax.text(0.3, 1.28, "Train 2013–2019 (1,540,698 pairs) · embargo 2020 · test 2021–2022 (455,458 pairs; 10,411 firms; 1.11% positives)",
-            fontsize=8.6, color="#1e293b")
+            fontsize=8.6, color="#000000")
     ax.text(0.3, 0.88, "Primary metric: average precision. Uncertainty: firm-cluster bootstrap for M3 − M2.",
-            fontsize=8.6, color="#1e293b")
+            fontsize=8.6, color="#000000")
     ax.text(0.3, 0.48, "Every feature at year t uses records dated ≤ t. The label is first CPC-subclass entry in t+1.",
-            fontsize=8.2, color="#334155")
+            fontsize=8.2, color="#000000")
     fig.tight_layout()
     fig.savefig(figdir / "figure1_architecture.pdf", bbox_inches="tight")
     fig.savefig(figdir / "figure1_architecture.png", dpi=300, bbox_inches="tight")
@@ -281,23 +281,23 @@ def write_protocol_figures(figdir: Path):
     ax.set_ylim(0, 3.2)
     ax.axis("off")
     ax.annotate("", xy=(11.7, 2.85), xytext=(0.25, 2.85),
-                arrowprops=dict(arrowstyle="-|>", color="#334155", lw=1.6))
+                arrowprops=dict(arrowstyle="-|>", color="#000000", lw=1.6))
     periods = [
-        (0.25, 2.15, "#e8eef6", "#1e3a5f", "2010–2012", "Fix 30 CPC candidates", "Burn-in only"),
-        (2.55, 3.55, "#d9e4f2", "#1e3a5f", "2013–2019", "1,540,698 training pairs", "2019 used for thresholds"),
-        (6.25, 1.4, "#f4eee4", "#7a5b20", "2020", "Embargo", "Unused year"),
-        (7.8, 3.95, "#dceee3", "#215c3a", "2021–2022", "455,458 pairs; 10,411 firms", "Labels unused in fitting"),
+        (0.25, 2.15, "-", "2010–2012", "Fix 30 CPC candidates", "Burn-in only"),
+        (2.55, 3.55, "-", "2013–2019", "1,540,698 training pairs", "2019 used for thresholds"),
+        (6.25, 1.4, "--", "2020", "Embargo", "Unused year"),
+        (7.8, 3.95, "-", "2021–2022", "455,458 pairs; 10,411 firms", "Labels unused in fitting"),
     ]
-    for x, w, face, edge, title, note, sub in periods:
+    for x, w, linestyle, title, note, sub in periods:
         patch = FancyBboxPatch((x, 1.15), w, 1.45, boxstyle="round,pad=0.02,rounding_size=0.06",
-                               facecolor=face, edgecolor=edge, linewidth=1.3)
+                               facecolor="#ffffff", edgecolor="#000000", linewidth=1.3, linestyle=linestyle)
         ax.add_patch(patch)
-        ax.text(x + w / 2, 2.25, title, ha="center", fontsize=10, fontweight="bold", color="#0f172a")
-        ax.text(x + w / 2, 1.85, note, ha="center", fontsize=8.4, color="#1e293b")
-        ax.text(x + w / 2, 1.5, sub, ha="center", fontsize=8.0, color="#334155")
+        ax.text(x + w / 2, 2.25, title, ha="center", fontsize=10, fontweight="bold", color="#000000")
+        ax.text(x + w / 2, 1.85, note, ha="center", fontsize=8.4, color="#000000")
+        ax.text(x + w / 2, 1.5, sub, ha="center", fontsize=8.0, color="#000000")
     ax.text(0.25, 0.45,
             "M1 and M2 use activity features only. M3 adds common-neighbor, peer-adoption, and degree features. A second chronological cutoff was not run.",
-            fontsize=8.2, color="#334155")
+            fontsize=8.2, color="#000000")
     fig.tight_layout()
     fig.savefig(figdir / "figure2_evaluation.pdf", bbox_inches="tight")
     fig.savefig(figdir / "figure2_evaluation.png", dpi=300, bbox_inches="tight")
