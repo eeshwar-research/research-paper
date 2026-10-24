@@ -9,14 +9,14 @@ Do time-valid firm–technology graph features improve out-of-time prediction of
 On a PatentsView organization-assignee extract (grant years 2010–2023; 10,878 firms), the graph-feature random forest improved average precision versus the same-learner forest on 2021–2022 pairs (ΔAP 0.017; firm-cluster 95% interval 0.015–0.019). Logistic regression was a competitive ranking baseline. Absolute AP stayed low against a 1.11% positive rate. See `paper.md` and `outputs/`.
 
 ## Structure
-- `paper.md` — *Knowledge-Based Systems* short-communication manuscript (two tables, two figures, numbered citations)
+- `paper.md` — *Knowledge-Based Systems* short-communication manuscript (two tables, one model-comparison figure, numbered citations)
 - `src/prepare_patentsview.py` — download, join, and normalize PatentsView tables
 - `src/experiment.py` — temporal experiment, baselines, graph features, firm-cluster bootstrap
 - `data/processed/firm_year_cpc.csv.gz` — normalized `firm_id,year,cpc_code` extract
 - `data/processed/firm_year_cpc.provenance.json` — source DOI, filters, hashes, counts
 - `data/LITERATURE_SEARCH.md` — Crossref-verified MDPI / IEEE / ScienceDirect references
-- `outputs/` — metrics, bootstrap, run summary, and a 300-dpi comparison chart (not a third manuscript figure)
-- `figures/` — Fig. 1 architecture, Fig. 2 temporal protocol, and a separate Elsevier graphical abstract (not a third manuscript figure)
+- `outputs/` — metrics, bootstrap, run summary, and the model-comparison chart used as Figure 1
+- `figures/` — Figure 1 model comparison, unused protocol diagrams, and a separate Elsevier graphical abstract (not a manuscript figure)
 
 ## Data
 Source: USPTO PatentsView granted-patent metadata through 31 December 2024, Zenodo DOI [10.5281/zenodo.15058362](https://doi.org/10.5281/zenodo.15058362), downloaded 23 October 2026. Tables: `g_patent`, `g_assignee_disambiguated`, `g_cpc_current`, joined on `patent_id`.

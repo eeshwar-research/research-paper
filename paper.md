@@ -57,15 +57,7 @@ All models score the same $(f,c,t)$ pairs. Features from Eq. (2) enter only in M
 The primary metric is average precision, reported with positive prevalence. ROC-AUC is secondary. Balanced accuracy uses the training-year threshold. Brier score measures probability quality. For M3 versus M2, a paired bootstrap resamples held-out firms as clusters (1,000 replicates) and reports a 95% interval for the average-precision difference.
 
 ## 3. Results and Discussion
-Results come from the released experiment code on the normalized PatentsView file. Synthetic smoke-test scores are not reported. Training uses 1,540,698 pairs (2013–2019). The 2021–2022 test set has 455,458 pairs, 10,411 of the 10,878 extract firms, 30 classes, and 5,057 first entries (prevalence 1.11%). Firms without an eligible unadopted candidate in the test window do not contribute test pairs. Figure 1 shows the pipeline; Figure 2 shows the executed split.
-
-**Figure 1.** Time-valid feature pipeline. PatentsView relations dated $\le t$ feed conventional activity features (M1, M2) and the inspectable graph block (M3 only). The label is first CPC-subclass entry in $t+1$.
-
-![](figures/figure1_architecture.png)
-
-**Figure 2.** Executed chronological split. Burn-in 2010–2012 freezes 30 CPC candidates; training uses 2013–2019; the dashed box is the unused 2020 embargo year; 2021–2022 is the test window. Thresholds are selected on 2019.
-
-![](figures/figure2_evaluation.png)
+Results come from the released experiment code on the normalized PatentsView file. Synthetic smoke-test scores are not reported. Training uses 1,540,698 pairs (2013–2019). The 2021–2022 test set has 455,458 pairs, 10,411 of the 10,878 extract firms, 30 classes, and 5,057 first entries (prevalence 1.11%). Firms without an eligible unadopted candidate in the test window do not contribute test pairs. Figure 1 shows the held-out ranking and thresholded-accuracy scores from the same run as Table 2.
 
 **Table 2.** Held-out performance on 2021–2022 (prevalence $=0.0111$). Higher is better except Brier score.
 
@@ -76,6 +68,10 @@ Results come from the released experiment code on the normalized PatentsView fil
 | M3 graph-feature forest | 0.0326 | 0.748 | 0.684 | 0.025 |
 
 Notes: Thresholds selected on 2019: 0.45 (M1), 0.11 (M2), 0.10 (M3). Firm-cluster bootstrap for M3 $-$ M2 average precision: $\Delta\mathrm{AP}=0.0172$ (95% interval 0.0155 to 0.0191; 1,000 resamples).
+
+**Figure 1.** Held-out 2021–2022 model comparison. Bars are average precision, ROC-AUC, and balanced accuracy from Table 2. Average precision is the primary metric; the 1.11% positive rate keeps those bars low. Brier scores are reported only in Table 2.
+
+![](figures/figure1_model_comparison.png)
 
 The M3–M2 interval excludes zero, so **H2 is supported**. M3 also has the best ROC-AUC, balanced accuracy, and Brier score. Absolute average precision remains low (0.033, about 2.9 times the 1.11% base rate). **H1 is not claimed:** the strongest tabular model on average precision is M1 (0.0313), not M2 (0.0155). M3's point-estimate advantage over M1 is 0.0013 and has no pre-specified interval. M2 is the weaker ranker on the same activity features, so the M3–M2 gain is evidence for the graph block rather than a generic advantage of random forests. A regularized linear ranker can outperform an untuned forest on rare events; that is why H1 is read against M1 and why H2, not a forest-versus-logistic contrast, is the graph-feature test.
 
@@ -93,7 +89,7 @@ PatentsView metadata: Zenodo DOI 10.5281/zenodo.15058362 [24]. Processed extract
 The author declares that there are no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
 
 ## Declaration of Generative AI and AI-Assisted Technologies
-During the preparation of this work the author used Cursor-hosted AI tools for literature metadata checking, language editing, and code documentation, and for artwork in the separate graphical-abstract file (not a manuscript figure). Figures 1 and 2 are author-drawn vector diagrams generated from the experiment protocol, not generative-AI images. After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article.
+During the preparation of this work the author used Cursor-hosted AI tools for literature metadata checking, language editing, and code documentation, and for artwork in the separate graphical-abstract file (not a manuscript figure). Figure 1 is a bar chart drawn from the released `outputs/metrics.csv` file, not a generative-AI image. After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article.
 
 ## Funding
 This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
