@@ -17,6 +17,7 @@ On a PatentsView organization-assignee extract (grant years 2010–2023; 10,878 
 - `data/LITERATURE_SEARCH.md` — Crossref-verified MDPI / IEEE / ScienceDirect references
 - `outputs/` — metrics, bootstrap, run summary, and the model-comparison chart used as Figure 1
 - `figures/` — Figure 1 model comparison, unused protocol diagrams, and a separate Elsevier graphical abstract (not a manuscript figure)
+- `submission/` — working Word copies of the manuscript and cover letter (not the Elsevier journal template)
 
 ## Data
 Source: USPTO PatentsView granted-patent metadata through 31 December 2024, Zenodo DOI [10.5281/zenodo.15058362](https://doi.org/10.5281/zenodo.15058362), downloaded 23 October 2026. Tables: `g_patent`, `g_assignee_disambiguated`, `g_cpc_current`, joined on `patent_id`.
