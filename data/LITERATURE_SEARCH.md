@@ -1,6 +1,6 @@
 # Literature search and citation verification
 
-Documented reference set for the *Knowledge-Based Systems* short communication. This is **not** a Scopus/Web of Science systematic review; those proprietary databases were not available here. Records were retrieved from Crossref, DataCite, publisher landing pages (Elsevier ScienceDirect, IEEE Xplore), and RePEc, then checked against the DOI resolver on 23 October 2026.
+Documented reference set for the *Knowledge-Based Systems* short communication. This is **not** a Scopus/Web of Science systematic review; those proprietary databases were not available here. Records were retrieved from Crossref, DataCite, publisher landing pages (Elsevier ScienceDirect, IEEE Xplore), and RePEc, then checked against the DOI resolver on 23 October 2026 and re-resolved on 24 October 2026. All 23 journal DOIs and the Zenodo dataset DOI still resolve to the cited titles, years, volumes, and author lists. The USPTO PatentsView page [25] returned HTTP 200 on 24 October 2026.
 
 ## Protocol
 - **Date:** 23 October 2026
