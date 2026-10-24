@@ -61,11 +61,11 @@ Results come from the released experiment code on the normalized PatentsView fil
 
 **Fig. 1.** Time-valid feature pipeline. PatentsView relations dated $\le t$ feed conventional activity features (M1, M2) and the inspectable graph block (M3 only). The label is first CPC-subclass entry in $t+1$.
 
-![Figure 1](figures/figure1_architecture.svg)
+![Figure 1](figures/figure1_architecture.png)
 
 **Fig. 2.** Executed chronological split. Burn-in 2010–2012 freezes 30 CPC candidates; training uses 2013–2019; the dashed box is the unused 2020 embargo year; 2021–2022 is the test window. Thresholds are selected on 2019.
 
-![Figure 2](figures/figure2_evaluation.svg)
+![Figure 2](figures/figure2_evaluation.png)
 
 **Table 2.** Held-out performance on 2021–2022 (prevalence $=0.0111$). Higher is better except Brier score.
 
