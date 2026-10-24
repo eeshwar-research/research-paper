@@ -63,7 +63,7 @@ Results come from the released experiment code on the normalized PatentsView fil
 
 ![Figure 1](figures/figure1_architecture.svg)
 
-**Fig. 2.** Executed chronological split. Burn-in 2010–2012 freezes 30 CPC candidates; training uses 2013–2019; 2020 is embargoed; 2021–2022 is the test window. Thresholds are selected on 2019.
+**Fig. 2.** Executed chronological split. Burn-in 2010–2012 freezes 30 CPC candidates; training uses 2013–2019; the dashed box is the unused 2020 embargo year; 2021–2022 is the test window. Thresholds are selected on 2019.
 
 ![Figure 2](figures/figure2_evaluation.svg)
 
