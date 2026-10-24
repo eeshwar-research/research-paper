@@ -366,16 +366,41 @@ def main():
                    **delta, "bootstrap_replicates_requested": args.bootstrap,
                    "note": "Paired cluster bootstrap resamples firms and retains all held-out pairs."}]).to_csv(
                        args.outdir / "paired_bootstrap.csv", index=False)
-    # Two-panel visual is intentionally avoided: one clean performance figure.
-    ax = res.set_index("model")[["average_precision", "roc_auc", "balanced_accuracy"]].plot(
-        kind="bar", figsize=(9.5, 5.4), ylim=(0, 1), rot=8)
+    # One manuscript comparison figure: grayscale grouped bars from the same metrics table.
+    pretty = {
+        "M1_logistic": "M1 logistic",
+        "M2_random_forest": "M2 random forest",
+        "M3_graph_features": "M3 graph-feature forest",
+    }
+    plot_df = res.set_index("model")[["average_precision", "roc_auc", "balanced_accuracy"]].rename(index=pretty)
+    fig, ax = plt.subplots(figsize=(7.2, 4.2))
+    x = range(len(plot_df))
+    width = 0.24
+    series = [
+        ("Average precision", plot_df["average_precision"], "#ffffff", "///"),
+        ("ROC-AUC", plot_df["roc_auc"], "#b0b0b0", ""),
+        ("Balanced accuracy", plot_df["balanced_accuracy"], "#000000", ""),
+    ]
+    for i, (label, values, face, hatch) in enumerate(series):
+        offset = (i - 1) * width
+        ax.bar([xi + offset for xi in x], values, width, label=label,
+               facecolor=face, edgecolor="#000000", hatch=hatch, linewidth=1.0)
     ax.set_ylabel("Score (higher is better)")
-    ax.set_title("Synthetic smoke test — not empirical evidence" if args.demo else "Future-period technology-entry prediction")
-    ax.grid(axis="y", alpha=.25)
-    ax.legend(loc="lower right", frameon=False)
-    plt.tight_layout()
-    plt.savefig(args.outdir / "figure2_model_comparison.png", dpi=300, bbox_inches="tight")
-    plt.close()
+    ax.set_xticks(list(x), list(plot_df.index))
+    ax.set_ylim(0, 1)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.yaxis.grid(True, linestyle=":", linewidth=0.6, color="#000000", alpha=0.35)
+    ax.set_axisbelow(True)
+    ax.legend(frameon=False, loc="upper left")
+    if args.demo:
+        ax.set_title("Synthetic smoke test — not empirical evidence")
+    fig.tight_layout()
+    fig.savefig(args.outdir / "figure2_model_comparison.png", dpi=300, bbox_inches="tight")
+    args.figdir.mkdir(parents=True, exist_ok=True)
+    fig.savefig(args.figdir / "figure1_model_comparison.png", dpi=300, bbox_inches="tight")
+    fig.savefig(args.figdir / "figure1_model_comparison.pdf", bbox_inches="tight")
+    plt.close(fig)
     summary = [
         f"mode={'synthetic demo only' if args.demo else 'real input CSV'}",
         f"source_rows={len(df)}", f"candidate_panel_rows={len(panel)}",

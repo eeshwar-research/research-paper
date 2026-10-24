@@ -18,11 +18,11 @@ Firm-specific technology opportunity discovery (TOD) already uses patent graphs 
 
 This short communication supplies that test on public PatentsView records [24,25]. The contribution is a leakage-aware technology-entry benchmark for a knowledge-based ranking system, not a new embedding model. Specifically: (i) candidates, timestamps, and cutoffs are frozen before scoring; (ii) the knowledge layer is a compact inspectable block (common-neighbor overlap, peer adoption, and co-occurrence degree) rather than a graph neural network; and (iii) the primary contrast holds the learner fixed so that any gain can be attributed to that block. Two hypotheses are pre-specified. **H1:** the graph-feature model achieves higher average precision than the strongest tabular baseline on the held-out period. **H2:** removing graph features reduces performance when the learner is held constant. H1 is read against the best tabular model on average precision. H2 is the same-learner contrast of the graph-feature forest versus the tabular forest.
 
-## 2. Data and method
-### 2.1 PatentsView extract
+## 2. Data and Method
+### 2.1 PatentsView Extract
 The source is the USPTO PatentsView granted-patent metadata dump through 31 December 2024, archived on Zenodo [24]. Later Open Data Portal files require authentication [25]. The granted-patent, disambiguated-assignee, and current-CPC tables were downloaded on 23 October 2026 and joined on `patent_id`. One unique row is kept per firm–year–CPC subclass. The firm identifier is the disambiguated organization `assignee_id`. Year is the grant year. Withdrawn and non-utility patents are dropped; `Y10*` indexing codes are excluded. Joint assignees create multiple rows. Firms must have at least eight grant years, eight subclasses, twenty rows, and one G or H subclass in 2010–2023. The extract has 1,453,416 rows, 10,878 firms, and 668 subclasses. After the candidate universe is frozen (Section 2.2), portfolios and first-entry labels are defined only inside that universe and the 2010–2023 window. The outcome is first observed CPC-subclass entry in granted patents inside that window, not commercial innovation and not a lifetime first filing.
 
-### 2.2 Knowledge graph and features
+### 2.2 Knowledge Graph and Features
 Let $F$ be firms and $C$ candidate CPC subclasses. For prediction year $t$,
 
 \begin{equation}
@@ -41,7 +41,7 @@ x^{\mathrm{deg}}_{c,t}=|\{c'\in C:\omega_t(c,c')>0\}|.
 
 $x^{\mathrm{cn}}$ is co-occurrence-weighted overlap with the candidate, $x^{\mathrm{peer}}$ is peer adoption, and $x^{\mathrm{deg}}$ is co-occurrence degree inside $C$. No graph neural network is trained.
 
-### 2.3 Models and evaluation
+### 2.3 Models and Evaluation
 Three models are compared on the same pairs (Table 1). **M1** is $\ell_2$-regularized logistic regression (default $C=1$) with balanced class weights and the conventional block. **M2** is a random forest (300 trees, $\sqrt{p}$ features, minimum leaf size 5, balanced subsample weights) with the same block. **M3** is the same forest with the graph block appended. The primary contrast is M3 versus M2. Hyperparameters and the random seed (41) were fixed before test scoring. Imputation and standardization are fitted on training rows only. The balanced-accuracy threshold is chosen on 2019, the last training year, from the grid $\{0.10,0.11,\ldots,0.90\}$.
 
 **Table 1.** Models compared on identical firm–class–year candidates.
@@ -56,16 +56,8 @@ All models score the same $(f,c,t)$ pairs. Features from Eq. (2) enter only in M
 
 The primary metric is average precision, reported with positive prevalence. ROC-AUC is secondary. Balanced accuracy uses the training-year threshold. Brier score measures probability quality. For M3 versus M2, a paired bootstrap resamples held-out firms as clusters (1,000 replicates) and reports a 95% interval for the average-precision difference.
 
-## 3. Results and discussion
-Results come from the released experiment code on the normalized PatentsView file. Synthetic smoke-test scores are not reported. Training uses 1,540,698 pairs (2013–2019). The 2021–2022 test set has 455,458 pairs, 10,411 of the 10,878 extract firms, 30 classes, and 5,057 first entries (prevalence 1.11%). Firms without an eligible unadopted candidate in the test window do not contribute test pairs. Fig. 1 shows the pipeline; Fig. 2 shows the executed split.
-
-**Fig. 1.** Time-valid feature pipeline. PatentsView relations dated $\le t$ feed conventional activity features (M1, M2) and the inspectable graph block (M3 only). The label is first CPC-subclass entry in $t+1$.
-
-![Figure 1](figures/figure1_architecture.png)
-
-**Fig. 2.** Executed chronological split. Burn-in 2010–2012 freezes 30 CPC candidates; training uses 2013–2019; the dashed box is the unused 2020 embargo year; 2021–2022 is the test window. Thresholds are selected on 2019.
-
-![Figure 2](figures/figure2_evaluation.png)
+## 3. Results and Discussion
+Results come from the released experiment code on the normalized PatentsView file. Synthetic smoke-test scores are not reported. Training uses 1,540,698 pairs (2013–2019). The 2021–2022 test set has 455,458 pairs, 10,411 of the 10,878 extract firms, 30 classes, and 5,057 first entries (prevalence 1.11%). Firms without an eligible unadopted candidate in the test window do not contribute test pairs. Figure 1 shows the held-out ranking and thresholded-accuracy scores from the same run as Table 2.
 
 **Table 2.** Held-out performance on 2021–2022 (prevalence $=0.0111$). Higher is better except Brier score.
 
@@ -77,6 +69,10 @@ Results come from the released experiment code on the normalized PatentsView fil
 
 Notes: Thresholds selected on 2019: 0.45 (M1), 0.11 (M2), 0.10 (M3). Firm-cluster bootstrap for M3 $-$ M2 average precision: $\Delta\mathrm{AP}=0.0172$ (95% interval 0.0155 to 0.0191; 1,000 resamples).
 
+**Figure 1.** Held-out 2021–2022 model comparison. Bars are average precision, ROC-AUC, and balanced accuracy from Table 2. Average precision is the primary metric; the 1.11% positive rate keeps those bars low. Brier scores are reported only in Table 2.
+
+![](figures/figure1_model_comparison.png)
+
 The M3–M2 interval excludes zero, so **H2 is supported**. M3 also has the best ROC-AUC, balanced accuracy, and Brier score. Absolute average precision remains low (0.033, about 2.9 times the 1.11% base rate). **H1 is not claimed:** the strongest tabular model on average precision is M1 (0.0313), not M2 (0.0155). M3's point-estimate advantage over M1 is 0.0013 and has no pre-specified interval. M2 is the weaker ranker on the same activity features, so the M3–M2 gain is evidence for the graph block rather than a generic advantage of random forests. A regularized linear ranker can outperform an untuned forest on rare events; that is why H1 is read against M1 and why H2, not a forest-versus-logistic contrast, is the graph-feature test.
 
 Graph features therefore add information the forest does not recover from activity features alone. That increment is what prior firm-specific TOD studies [1–7,11,17] typically leave unmeasured when evaluation is not leakage-controlled and many-firm. The increment still does not yield operational opportunity lists. M1 matches M3 on ranking yet has a much worse Brier score, so ranking and calibration must be reported together [22,23]. An average precision of 0.033 can help an analyst prioritize a review list; it cannot authorize class entry [8,15]. In R&D portfolio screening, the scores can order a shortlist for human review, but they cannot replace due diligence on capability, market, or legal fit. The knowledge layer is an auditable feature block, not an opaque embedding or a new GNN [2,6,9,19–21].
@@ -86,20 +82,20 @@ Assignee disambiguation, grant rather than filing dates, dump-dated current CPC 
 ## 4. Conclusion
 This short communication showed that, on PatentsView organization assignees from 2010–2023, temporal graph features improved the random forest on a 2021–2022 holdout, with a firm-clustered interval that excluded no gain. Logistic regression remained a strong ranking baseline, and absolute average precision stayed low. Relational features earn a place in a knowledge-based technology-opportunity system only as incremental, inspectable ranking signals.
 
-## CRediT authorship contribution statement
-**Eeshwar:** Conceptualization, Methodology, Software, Investigation, Formal analysis, Validation, Data curation, Visualization, Writing – original draft, Writing – review and editing.
+## Data Availability
+PatentsView metadata: Zenodo DOI 10.5281/zenodo.15058362 [24]. Processed extract, code, and reported outputs: https://github.com/eeshwar-research/research-paper. A DOI deposit of the processed table and metrics is still required for the journal's research-data Option C. The GitHub archive is not a substitute for that deposit.
 
-## Declaration of competing interests
+## Declaration of Competing Interest
 The author declares that there are no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+## Declaration of Generative AI and AI-Assisted Technologies
+During the preparation of this work the author used Cursor-hosted AI tools for literature metadata checking, language editing, and code documentation, and for artwork in the separate graphical-abstract file (not a manuscript figure). Figure 1 is a bar chart drawn from the released `outputs/metrics.csv` file, not a generative-AI image. After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article.
 
 ## Funding
 This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 
-## Data availability
-PatentsView metadata: Zenodo DOI 10.5281/zenodo.15058362 [24]. Processed extract, code, and reported outputs: https://github.com/eeshwar-research/research-paper. A DOI deposit of the processed table and metrics is still required for the journal's research-data Option C. The GitHub archive is not a substitute for that deposit.
-
-## Declaration of generative AI and AI-assisted technologies in the manuscript preparation process
-During the preparation of this work the author used Cursor-hosted AI tools for literature metadata checking, language editing, and code documentation, and for artwork in the separate graphical-abstract file (not a manuscript figure). Figures 1 and 2 are author-drawn vector diagrams generated from the experiment protocol, not generative-AI images. After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article.
+## CRediT Authorship Contribution Statement
+**Eeshwar:** Conceptualization, Methodology, Software, Investigation, Formal analysis, Validation, Data curation, Visualization, Writing – original draft, Writing – review and editing.
 
 ## Acknowledgements
 The author thanks the USPTO PatentsView program for disambiguated patent metadata.
